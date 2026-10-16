@@ -306,7 +306,7 @@
   .st .fld>label{color:#ffcdd0}
   .badge.st{background:rgba(229,72,77,.2); color:#ffb3b5; margin-right:4px}
   .btn.novo{display:inline-flex; align-items:center; gap:12px; font-size:19px; font-weight:900; letter-spacing:2.5px; padding:15px 26px}
-  .btn.novo .bist{width:46px; height:18px; flex:none}
+  .btn.novo .bist{width:46px; height:18px; flex:none; transform:scaleY(-1)}
   .autores{margin-top:12px; color:var(--mut); font-size:13px; line-height:1.7}
   .autores b{color:#cfe0f5}
   .creditos{text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; padding:18px 10px 8px;
@@ -1356,8 +1356,6 @@ function htmlLista(){
      + '<span class="sp" style="flex:1"></span>'
      + '<button class="btn" data-a="export">Exportar dados</button>'
      + '</div>'
-     + '<div class="autores"><div><b>Lucas Domingos Ribeiro</b> — R3 Cirurgia Geral <span style="white-space:nowrap">EPM | UNIFESP</span></div>'
-     + '<div><b>Marcos Vinícius Veanholi</b> — R2 Cirurgia Geral <span style="white-space:nowrap">EPM | UNIFESP</span></div></div>'
      + '<p class="hint" style="margin:10px 0 0">Não digite nome, prontuário ou iniciais neste aparelho. '
      + 'A ligação entre o código do estudo e o paciente fica no caderno de triagem da sala.</p></div>';
 
@@ -1381,7 +1379,9 @@ function htmlLista(){
   h += '</div>';
   h += '<div class="creditos">'
      + '<div class="cr">© Outubro de 2026 · Escola Paulista de Medicina – UNIFESP</div>'
-     + 'Desenvolvido por <b>Lucas Domingos Ribeiro</b> e <b>Marcos Vinícius Veanholi</b><br>'
+     + 'Desenvolvido por<br>'
+     + '<b>Lucas Domingos Ribeiro</b> — R3 Cirurgia Geral <span style="white-space:nowrap">EPM | UNIFESP</span><br>'
+     + '<b>Marcos Vinícius Veanholi</b> — R2 Cirurgia Geral <span style="white-space:nowrap">EPM | UNIFESP</span><br>'
      + 'Orientação: <b>Prof. Dr. Diego Adão</b>'
      + '</div></div>';
   return h;
