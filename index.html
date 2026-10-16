@@ -15,6 +15,9 @@
 <meta name="theme-color" content="#0c141f">
 <link rel="manifest" href="manifest.json">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Manrope:wght@400;600;800&display=swap">
 <title>Ficha de Padronização Assistencial — Politraumatizado · EPM-UNIFESP</title>
 <meta name="author" content="Lucas Domingos Ribeiro; Marcos Vinícius Veanholi — orientação: Prof. Dr. Diego Adão">
 <style>
@@ -347,6 +350,69 @@
   .btn.novo:active{transform:translateY(1px)}
   @media(max-width:780px){ .btn.novo{width:100%; justify-content:center} }
   .logos img{background:transparent !important; padding:0 !important; height:30px}
+  /* ================= capa editorial (cores EPM) ================= */
+  :root{ --epm-navy:#0a1f44; --epm-navy2:#102c5e; --epm-cyan:#35a7e0; --epm-green:#1f8a4c; }
+  .hero3{position:relative; margin:4px -16px 18px; padding:22px 28px 54px; color:#fff;
+    font-family:"Manrope",system-ui,sans-serif;
+    background:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0/40px 40px,
+      radial-gradient(700px 380px at 85% 30%, rgba(53,167,224,.22), transparent 70%),
+      radial-gradient(600px 300px at 0% 100%, rgba(31,138,76,.18), transparent 70%),
+      linear-gradient(160deg, var(--epm-navy) 0%, var(--epm-navy2) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) top/100% calc(100% - 18px) no-repeat,
+       conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom/36px 18px repeat-x;
+            mask: linear-gradient(#000 0 0) top/100% calc(100% - 18px) no-repeat,
+       conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom/36px 18px repeat-x}
+  .h3-ecg{position:absolute; left:0; right:0; bottom:40px; width:100%; height:110px; pointer-events:none; opacity:.9}
+  .h3-ecg path{fill:none; stroke-linejoin:round; stroke-linecap:round}
+  .h3-ecg .base{stroke:rgba(53,167,224,.22); stroke-width:2}
+  .h3-ecg .pulse{stroke:#ff4d55; stroke-width:3; stroke-dasharray:220 2200; stroke-dashoffset:2420;
+     filter:drop-shadow(0 0 6px rgba(255,77,85,.9)); animation:ecg 4.2s linear infinite}
+  @keyframes ecg{to{stroke-dashoffset:0}}
+  @media (prefers-reduced-motion: reduce){ .h3-ecg .pulse{animation:none; stroke-dasharray:none; opacity:.5} }
+  .hero3>*:not(.h3-ecg){position:relative; z-index:1}
+  .h3-num{background:linear-gradient(180deg,#fff 30%,#9fd4f3); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .hero3 h1 .i{background:linear-gradient(90deg,#fff 0%,#cfe9fb 60%,#35a7e0 100%); -webkit-background-clip:text; background-clip:text; color:transparent; padding-right:.08em}
+  .h3-novo{animation:pulsoBtn 2.6s ease-in-out infinite}
+  @keyframes pulsoBtn{0%,100%{box-shadow:0 10px 26px rgba(229,57,53,.35)}50%{box-shadow:0 10px 40px rgba(229,57,53,.7), 0 0 0 6px rgba(229,57,53,.12)}}
+  @media (prefers-reduced-motion: reduce){ .h3-novo{animation:none} }
+  .h3-top{display:flex; justify-content:center; gap:26px; flex-wrap:wrap; font-size:13px; color:#a9bedb; letter-spacing:.3px}
+  .h3-top b{color:#fff}
+  .h3-grid{display:grid; grid-template-columns:1.25fr 1fr; gap:24px; align-items:center; margin-top:26px}
+  .h3-kick{color:var(--epm-cyan); font-weight:800; letter-spacing:3px; text-transform:uppercase; font-size:13px}
+  .hero3 h1{margin:10px 0 0; font-family:"Playfair Display",Georgia,serif; line-height:.98; letter-spacing:-.5px}
+  .hero3 h1 .r{display:block; font-weight:700; font-size:clamp(36px,5.4vw,72px)}
+  .hero3 h1 .i{display:block; font-style:italic; font-weight:900; font-size:clamp(42px,7.4vw,104px)}
+  .h3-quote{margin:22px 0 0; padding-left:16px; border-left:3px solid #ff4d55}
+  .h3-quote em{display:block; font-family:"Playfair Display",Georgia,serif; font-size:clamp(20px,2.4vw,28px)}
+  .h3-quote small{display:block; margin-top:6px; color:#a9bedb; font-size:13.5px}
+  .h3-novo{margin-top:24px}
+  .h3-right{text-align:right; position:relative}
+  .h3-logos{display:flex; justify-content:flex-end; align-items:center; gap:18px}
+  .h3-logos .lg1{height:86px} .h3-logos .lg2{height:96px; padding:6px; border-radius:14px; background:var(--epm-green);
+     box-shadow:0 8px 22px rgba(0,0,0,.35)}
+  .h3-num{font-family:"Playfair Display",Georgia,serif; font-weight:900; font-size:clamp(84px,13vw,190px); line-height:.9; margin-top:14px;
+     text-shadow:0 6px 30px rgba(53,167,224,.25)}
+  .h3-numl{font-weight:800; font-size:18px}
+  .h3-nums{color:var(--epm-cyan); font-weight:600; font-size:14px; margin-top:2px}
+  .h3-stats{display:flex; flex-wrap:wrap; gap:10px 30px; margin-top:30px; color:#cdd9ea; font-size:16px}
+  .h3-stats b{font-family:"Playfair Display",Georgia,serif; font-weight:900; font-size:30px; color:#fff; margin-right:4px}
+  .h3-stats b.c-a{color:#f2cc60} .h3-stats b.c-c{color:var(--epm-cyan)} .h3-stats b.c-r{color:#ff5a5f}
+  .h3-sync{margin-top:16px; font-size:14px; color:#a9bedb; display:flex; align-items:center; gap:8px}
+  .h3-sync i{width:9px; height:9px; border-radius:50%; background:#f2cc60; display:inline-block}
+  .h3-sync i.on{background:#57d66a; box-shadow:0 0 10px #57d66a}
+  @media(max-width:780px){
+    .hero3{padding:18px 18px 46px}
+    .h3-top{gap:6px 16px; font-size:12px}
+    .h3-grid{grid-template-columns:1fr; gap:6px}
+    .h3-right{order:-1; display:flex; align-items:flex-end; justify-content:space-between; text-align:left}
+    .h3-logos{order:2; gap:10px} .h3-logos .lg1{height:52px} .h3-logos .lg2{height:60px; padding:4px; border-radius:10px}
+    .h3-num{font-size:84px; margin:0} .h3-numl{font-size:14px} .h3-nums{font-size:12px}
+    .h3-novo{width:100%; justify-content:center}
+    .h3-left{margin-top:18px} .h3-kick{font-size:11.5px; letter-spacing:2.2px}
+    .h3-stats{gap:6px 18px; font-size:14px} .h3-stats b{font-size:24px}
+  }
   .creditos{text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; padding:18px 10px 8px;
        border-top:1px solid var(--line); margin-top:8px}
   .creditos b{color:#cfe0f5; font-weight:700}
@@ -1383,22 +1449,30 @@ function htmlLista(){
   const lista0 = ativos(), mes = hojeBR().slice(3);
   const abertos = lista0.filter(c=>!c._fechado).length;
   let h = '<div class="wrap">'
-    + '<div class="hero2">'
-    + '<img class="h-dcir" src="'+LOGO_DCIR+'" alt="Departamento de Cirurgia">'
-    + '<div class="h-txt"><div class="h-kick">PS Cirurgia Geral · Hospital São Paulo</div>'
-    + '<h1>Ficha de Padronização Assistencial de Atendimento ao Politraumatizado</h1>'
-    + '<div class="h-bar"></div>'
-    + '<div class="h-sub">Escola Paulista de Medicina – UNIFESP</div></div>'
-    + '<img class="h-epm" src="'+LOGO_EPM+'" alt="Escola Paulista de Medicina">'
+    + '<section class="hero3">' + '<svg class="h3-ecg" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true"><path class="base" d="M0 70 H330 L350 70 L362 52 L374 70 H420 L436 70 L448 14 L462 112 L476 40 L488 70 H560 L590 58 L620 70 H820 L836 70 L846 60 L856 70 H900 L914 70 L926 22 L940 104 L952 50 L962 70 H1200"/><path class="pulse" d="M0 70 H330 L350 70 L362 52 L374 70 H420 L436 70 L448 14 L462 112 L476 40 L488 70 H560 L590 58 L620 70 H820 L836 70 L846 60 L856 70 H900 L914 70 L926 22 L940 104 L952 50 L962 70 H1200"/></svg>'
+    + '<div class="h3-top"><span><b>PS Cirurgia Geral</b></span><span>Hospital São Paulo</span><span>EPM | UNIFESP</span></div>'
+    + '<div class="h3-grid">'
+    + '<div class="h3-left">'
+    + '<div class="h3-kick">Ficha de padronização assistencial</div>'
+    + '<h1><span class="r">Atendimento ao</span><span class="i">Politraumatizado</span></h1>'
+    + '<div class="h3-quote"><em>Primum non nocere</em><small>Escola Paulista de Medicina – UNIFESP · Departamento de Cirurgia</small></div>'
+    + '<button class="btn novo h3-novo" data-a="novo">'+BISTURI+'<span>NOVO CASO</span></button>'
     + '</div>'
-    + '<div class="stats">'
-    + '<div class="stat s-g"><div class="l">Casos registrados</div><div class="v">'+lista0.length+'</div></div>'
-    + '<div class="stat s-a"><div class="l">Em aberto</div><div class="v">'+abertos+'</div></div>'
-    + '<div class="stat s-b"><div class="l">Fechados</div><div class="v">'+(lista0.length-abertos)+'</div></div>'
-    + '<div class="stat s-r"><div class="l">Neste mês</div><div class="v">'+lista0.filter(c=>String(c.data||"").slice(3)===mes).length+'</div></div>'
-    + '</div>';
+    + '<div class="h3-right">'
+    + '<div class="h3-logos"><img src="'+LOGO_DCIR+'" alt="Departamento de Cirurgia" class="lg1"><img src="'+LOGO_EPM+'" alt="Escola Paulista de Medicina" class="lg2"></div>'
+    + '<div class="h3-count"><div class="h3-num">'+lista0.length+'</div>'
+    + '<div class="h3-numl">casos registrados</div>'
+    + '<div class="h3-nums">'+(Sync.ligado() ? "na nuvem da equipe" : "neste aparelho")+'</div></div>'
+    + '</div></div>'
+    + '<div class="h3-stats">'
+    + '<span><b class="c-a">'+abertos+'</b> em aberto</span>'
+    + '<span><b>'+(lista0.length-abertos)+'</b> fechados</span>'
+    + '<span><b class="c-c">'+lista0.filter(c=>String(c.data||"").slice(3)===mes).length+'</b> neste mês</span>'
+    + '<span><b class="c-r">'+lista0.filter(c=>c.st_acionado==="Sim").length+'</b> com sangue total</span>'
+    + '</div>'
+    + '<div class="h3-sync"><i class="'+(Sync.ligado()?"on":"")+'"></i>'+(Sync.ligado() ? "Sincronizado com a equipe" : "Salvando só neste aparelho — toque em ☁︎ para entrar")+'</div>'
+    + '</section>';
   h += '<div class="sec"><div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">'
-     + '<button class="btn p novo" data-a="novo">'+BISTURI+'<span>NOVO CASO</span></button>'
      + '<span class="sp" style="flex:1"></span>'
      + '<button class="btn" data-a="export">Exportar dados</button>'
      + '</div>'

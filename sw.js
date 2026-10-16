@@ -1,6 +1,6 @@
 /* Service worker — cache local para funcionamento offline.
    Ao publicar uma versão nova do app, troque o número em CACHE. */
-const CACHE = "ficha-trauma-v32";
+const CACHE = "ficha-trauma-v33";
 const ARQUIVOS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 /* logos são opcionais: se não estiverem no repositório, a instalação não pode falhar */
 const OPCIONAIS = ["./logo-epm.png", "./logo-unifesp.png", "./logo-epm.svg", "./logo-unifesp.svg"];
@@ -24,7 +24,8 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   /* nunca cachear a nuvem (login e Firestore): só o app e as bibliotecas */
   const u = new URL(e.request.url);
-  if (u.origin !== location.origin && u.hostname !== "www.gstatic.com") return;
+  /* fontes do Google também ficam guardadas, para a capa abrir igual sem rede */
+  if (u.origin !== location.origin && ["www.gstatic.com","fonts.googleapis.com","fonts.gstatic.com"].indexOf(u.hostname) < 0) return;
   e.respondWith(
     caches.match(e.request).then(hit =>
       hit || fetch(e.request).then(resp => {
