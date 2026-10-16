@@ -380,7 +380,7 @@ const XABCDE = [
    ["Compressão","Torniquete","Sutura hemostática"]],
   ["A","a","Via aérea pérvia, sem enfisema ou hematoma cervical, sem desvio de traqueia, com CC + PR.",
    ["IOT","Cricotireoidostomia","Cânula orofaríngea"]],
-  ["B","b","FR: {fr} irpm. SO2: {spo2}% aa. Expansibilidade torácica simétrica, sem enfisema de subcutâneo. "
+  ["B","b","FR: {fr} irpm. SO2: {spo2}% aa. MV presente bilateralmente, sem ruídos adventícios. Expansibilidade torácica simétrica, sem enfisema de subcutâneo. "
          + "E-FAST com {ls}, sem outros achados.",
    ["Dreno à direita","Dreno à esquerda","Descompressão por agulha"]],
   ["C","c","PA: {pa}, FC {fc} bpm, sem dor à palpação abdominal e sem dor à palpação de ossos longos, "
@@ -401,7 +401,7 @@ function fraseX(frase){
     /* LS e FAST só aparecem depois do exame — nunca presumidos */
     fast: fast ? esc(fast.toLowerCase()) : "__",
     ls: lsTexto(),
-    gcs: gcsTotal()!==null ? gcsTotal() : "__", o: v("gcs_o"), v: v("gcs_v"), m: v("gcs_m")
+    gcs: gcsTotal()!==null ? gcsTotal() : (gcsTemNT() ? "NT" : "__"), o: v("gcs_o"), v: v("gcs_v"), m: v("gcs_m")
   };
   return esc(frase).replace(/\{(\w+)\}/g, (_,k)=> '<b>'+(vals[k]!==undefined ? vals[k] : "__")+'</b>');
 }
@@ -585,12 +585,15 @@ const GCS = {
 function fGcs(k){
   const [rot, itens] = GCS[k];
   let h = '<div class="fld"><label>'+rot+'</label><div class="gcs">';
-  itens.forEach(([v,nome,desc])=>{
+  itens.concat([["NT","Não testável",GCS_NT[k]]]).forEach(([v,nome,desc])=>{
     h += '<button class="opt '+(get(k)===v?"on":"")+'" data-a="radio" data-k="'+k+'" data-v="'+v+'">'
-       + '<b>'+v+'</b><span>'+nome+'<small>'+desc+'</small></span></button>';
+       + '<b'+(v==="NT"?' style="font-size:12px"':'')+'>'+v+'</b><span>'+nome+'<small>'+desc+'</small></span></button>';
   });
   return h + '</div></div>';
 }
+const GCS_NT = { gcs_o:"ex.: edema palpebral, trauma ocular", gcs_v:"ex.: intubado, traqueostomia", gcs_m:"ex.: sedação, curarização, lesão medular" };
+function gcsTemNT(){ return ["gcs_o","gcs_v","gcs_m"].some(k=>get(k)==="NT"); }
+function gcsDescr(){ return "O"+(get("gcs_o")||"?")+" V"+(get("gcs_v")||"?")+" M"+(get("gcs_m")||"?"); }
 function gcsGravidade(g){ return g<=8 ? "grave — considerar via aérea definitiva" : (g<=12 ? "moderado" : "leve"); }
 
 /* ácido tranexâmico — esquemas do serviço */
@@ -599,23 +602,16 @@ const ATX_LEGADO = {"1 g em 10 min + 1 g em 8 h":"1 g IV em 10 min + 1 g IV em d
                     "2 g em bolus único":"2 g IV em bolus","1 g dose única":"1 g IV em bolus"};
 
 /* cálcio: 1 ampola para cada 2 concentrados de hemácias */
-const CALCIO_TIPOS = ["Cloreto de cálcio 10% (preferencial)","Gluconato de cálcio 10% (na falta do cloreto)"];
-function calcioIndicado(){ const ch = parseInt(get("t_ch"),10); return ch>0 ? Math.floor(ch/2) : 0; }
+const CALCIO_SAIS = ["Cloreto de cálcio","Gluconato de cálcio"];
 function blocoCalcio(){
-  const ch = parseInt(get("t_ch"),10) || 0, ind = calcioIndicado(), feito = parseInt(get("calcio_ampolas"),10) || 0;
+  const ch = parseInt(get("t_ch"),10)||0, st = parseInt(get("t_st"),10)||0, un = ch+st;
   let h = '<div class="box" style="margin-top:10px">'
         + '<div class="boxt">Reposição de cálcio</div>'
-        + '<p class="hint" style="margin:0 0 8px">Para cada <b>2 concentrados de hemácias</b>, <b>1 ampola de cloreto de cálcio 10%</b> (preferencial). '
-        + 'Na ausência, gluconato de cálcio 10% — atenção: 1 ampola de cloreto ≈ 3 de gluconato em cálcio elementar.</p>'
-        + fRadio("calcio_tipo","Sal utilizado",CALCIO_TIPOS)
-        + '<div class="grid g2" style="margin-top:8px">'+fTexto("calcio_ampolas","Ampolas feitas","","number")+'</div>';
-  if(ch>=2){
-    const ok = feito>=ind;
-    h += '<div class="alert '+(ok?"g":"a")+'">'+ch+' hemácia'+(ch===1?"":"s")+' → '+ind+' ampola'+(ind===1?"":"s")+' de cálcio indicada'+(ind===1?"":"s")
-       + ' · feita'+(feito===1?"":"s")+': '+feito+(ok?" ✓":" — faltam "+(ind-feito))+'</div>';
-  }else if(get("ptm")==="Acionado"){
-    h += '<div class="alert a">PTM acionado: registre as hemácias abaixo para calcular o cálcio.</div>';
-  }
+        + '<p class="hint" style="margin:0 0 8px">Para cada <b>2 unidades</b> de concentrado de hemácias <b>ou sangue total</b>, 1 ampola de cálcio.</p>'
+        + fRadio("calcio_reposto","Cálcio reposto?",["Sim","Não"]);
+  if(get("calcio_reposto")==="Sim") h += '<div style="margin-top:8px">'+fRadio("calcio_sal","Sal utilizado",CALCIO_SAIS)+'</div>';
+  if(un>=2 && get("calcio_reposto")!=="Sim")
+    h += '<div class="alert a">'+un+' unidade'+(un>1?"s":"")+' de hemácias/sangue total transfundida'+(un>1?"s":"")+' — lembrar do cálcio.</div>';
   return h + '</div>';
 }
 
@@ -796,6 +792,10 @@ function normalizarCaso(c){
       if(c.efast_ls_lado!=="Esquerdo") c.efast_ls_d = "Negativo";
       if(c.efast_ls_lado!=="Direito") c.efast_ls_e = "Negativo";
     }
+  }
+  if(!c.calcio_reposto && (c.calcio_tipo || c.calcio_reposto_sala)){
+    c.calcio_reposto = "Sim";
+    if(c.calcio_tipo) c.calcio_sal = /gluconato/i.test(c.calcio_tipo) ? "Gluconato de cálcio" : "Cloreto de cálcio";
   }
   if(c.atx_esquema && ATX_LEGADO[c.atx_esquema]) c.atx_esquema = ATX_LEGADO[c.atx_esquema];
   if(typeof c.mecanismo==="string") c.mecanismo = [c.mecanismo];
@@ -1570,6 +1570,8 @@ function calcAdmHTML(){
   let h = "";
   if(g!==null) h += '<div class="alert '+(g<=8?"r":(g<=12?"a":"g"))+'">Glasgow '+g
      + ' (O'+get("gcs_o")+' V'+get("gcs_v")+' M'+get("gcs_m")+') — TCE '+gcsGravidade(g)+'</div>';
+  else if(gcsTemNT()) h += '<div class="alert a">Glasgow com item não testável ('+gcsDescr()+') — total não calculado; '
+     + 'RTS e TRISS ficam sem o componente neurológico.</div>';
   if(si!==null) h += '<div class="alert '+(si>=1?"r":"g")+'">Shock Index '+si.toFixed(2)+(si>=1?" — perfusão comprometida, considere critérios de transfusão maciça":"")+'</div>';
   return h;
 }
@@ -1974,10 +1976,7 @@ function ligar(){
       if(el.dataset.k==="h_trauma") el.addEventListener("change", ()=> render());
       if(el.dataset.k==="velocidade") el.addEventListener("change", ()=>{ aplicarVelocidade(); render(); });
       if(el.dataset.k==="efast_sinfise_cm") el.addEventListener("change", ()=>{ sincronizarExameX(); render(); });
-      if(el.dataset.k==="t_ch" || el.dataset.k==="calcio_ampolas") el.addEventListener("change", ()=>{
-        const c = caso(); if((parseInt(c.calcio_ampolas,10)||0)>0) c.calcio_reposto_sala = true; else delete c.calcio_reposto_sala;
-        salvar(); render();
-      });
+      if(el.dataset.k==="t_ch" || el.dataset.k==="t_st") el.addEventListener("change", ()=>{ salvar(); render(); });
     }
   });
 }

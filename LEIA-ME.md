@@ -61,6 +61,15 @@ para coleta real.
 5. Fim do plantão ou uma vez por semana: **Casos → Exportar dados → Baixar CSV**.
    Guardar o arquivo e importar no REDCap.
 
+## Novidades da versão 27 — Glasgow NT, cálcio simplificado
+
+- Glasgow: opção **NT (não testável)** em O, V e M (ex.: intubado). Com NT, o total não é
+  calculado e a frase da letra D mostra "Glasgow NT".
+- Cálcio: **Cálcio reposto? Sim/Não** e, se sim, **sal utilizado** (cloreto ou gluconato).
+  A regra (1 ampola a cada 2 unidades) agora conta concentrado de hemácias **e sangue total**.
+- Letra B: frase-padrão inclui "MV presente bilateralmente, sem ruídos adventícios".
+- CSV: `calcio_reposto`, `calcio_sal`.
+
 ## Novidades da versão 26 — sincronização ligada
 
 - Projeto Firebase **ficha-politrauma-hsp** criado (Firestore em São Paulo, login por e-mail/senha).
