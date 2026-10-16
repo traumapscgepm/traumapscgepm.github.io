@@ -470,7 +470,7 @@
 /* ============================ ESQUEMA ============================ */
 const HORARIOS = [
   ["h_trauma","Trauma"],["h_porta","Porta (chegada)"],["h_acesso","1º acesso funcionante"],
-  ["h_efast","E-FAST"],["h_atx","Ácido tranexâmico"],["h_ptm","PTM acionado"],["h_st","Sangue total acionado"],
+  ["h_efast","FAST-PLUS"],["h_atx","Ácido tranexâmico"],["h_ptm","PTM acionado"],["h_st","Sangue total acionado"],
   ["h_transf","1ª transfusão"],["h_tc","TC executada"],["h_aviso","Aviso cirúrgico"],
   ["h_cc","Entrada no CC"],["h_uti","Admissão UTI"],["h_saida","Saída da sala"]
 ];
@@ -598,7 +598,7 @@ function sinfiseCm(){ const v = parseFloat(String(get("efast_sinfise_cm")||"").r
 function pelveInstavel(){ const v = sinfiseCm(); return v!==null && v>1.0; }
 function botoesPlus(){
   const v = sinfiseCm(), inst = pelveInstavel();
-  let h = '<div class="fld"><label>E-FAST-PLUS — sínfise púbica</label>'
+  let h = '<div class="fld"><label>FAST-PLUS — sínfise púbica</label>'
         + '<div class="fwin '+(inst?"pos":"")+'"><span class="fwl">Distância da sínfise (cm)<small>&gt; 1,0 cm = pelve instável</small></span>'
         + '<div class="opts" style="align-items:center">'
         + '<input type="number" inputmode="decimal" step="0.1" min="0" data-k="efast_sinfise_cm" value="'+esc(get("efast_sinfise_cm")||"")+'" '
@@ -626,7 +626,7 @@ function sincronizarExameX(){
   if(c.efast_ls==="Negativo") vira("b", "E-FAST com LS negativo "+(c.efast_ls_lado==="Bilateral" ? "bilateralmente" : (c.efast_ls_lado==="Direito" ? "à direita" : "à esquerda"))+".");
   const partesC = [];
   if(c.efast_global==="Positivo") partesC.push("FAST positivo — janela "+(c.efast_janelas_pos||"")+".");
-  if(pelveInstavel()) partesC.push("E-FAST-PLUS: sínfise púbica com "+String(sinfiseCm()).replace(".",",")+" cm — pelve instável (livro aberto).");
+  if(pelveInstavel()) partesC.push("FAST-PLUS: sínfise púbica com "+String(sinfiseCm()).replace(".",",")+" cm — pelve instável (livro aberto).");
   if(partesC.length) vira("c", partesC.join(" ")); else desfaz("c");
   /* critério "fratura de pelve" do RABT acompanha a sínfise, sem desfazer marcação manual */
   if(pelveInstavel() && !c.rabt_pelve){ c.rabt_pelve = true; c._imp_pelve = true; }
@@ -862,7 +862,7 @@ const BISTURI = '<svg class="bist" viewBox="0 0 64 24" aria-hidden="true">'
   + '<rect x="36" y="9" width="26" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>'
   + '</svg>';
 
-const SECOES = ["Identificação","Horários","iMIST-AMBO","Admissão","X-ABCDE","E-FAST","Hemostasia","Saída","Escores","Pós"];
+const SECOES = ["Identificação","Horários","iMIST-AMBO","Admissão","X-ABCDE","FAST-PLUS","Hemostasia","Saída","Escores","Pós"];
 
 /* regiões do AIS para o cálculo do ISS */
 const AIS_REGIOES = [
@@ -1693,7 +1693,8 @@ function secCena(){
    + '<div style="margin-top:10px">'+fRadio("anticoag","M · Medicações — anticoagulante ou antiagregante",["Não","Sim","Não avaliável"])+'</div>'
    + (get("anticoag")==="Sim" ? '<div style="margin-top:8px">'+fTexto("anticoag_qual","Qual droga e última dose")+'</div>' : "")
    + '<div style="margin-top:10px">'+fTexto("comorbidades","B · Background — comorbidades relevantes","cardiopatia, hepatopatia, doença renal… ou Nega")+'</div>'
-   + '<div style="margin-top:10px">'+fMulti("marcadores","O · Outros — marcadores",["Etilismo ou drogas","Recusa transfusão","Gestante","Cirurgia neurológica prévia"])+'</div>'
+   + '<div style="margin-top:10px">'+fMulti("marcadores","O · Outros — marcadores",["Etilismo ou drogas","Recusa transfusão","Gestante","Cirurgia neurológica prévia"])
+   + '<div style="margin-top:8px">'+fTexto("outros_desc","Outros — descrever","outras informações relevantes (preenchimento livre)")+'</div></div>'
    + '</div>';
 }
 
@@ -1769,7 +1770,7 @@ function secXabcde(){
 
 /* --- 5 · E-FAST e E-FAST-PLUS --- */
 function secFast(){
-  let h='<div class="sec"><h2>E-FAST</h2>';
+  let h='<div class="sec"><h2>FAST-PLUS</h2><p class="hint" style="margin:-4px 0 10px">Inclui as janelas do FAST, o lung sliding (E-FAST) e a sínfise púbica (PLUS).</p>';
   h += botoesFAST();
   if(get("efast_global")) h += '<p class="hint" style="margin:4px 0 10px">Resultado global (calculado): <b>'+get("efast_global")+'</b></p>';
   if(get("efast_global")==="Positivo") h += '<div style="margin-bottom:10px">'+fTexto("efast_achado","Detalhe do achado (opcional)","volume, aspecto…")+'</div>';
