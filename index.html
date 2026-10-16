@@ -305,6 +305,10 @@
       letter-spacing:2px; font-size:17px; color:#fff; background:#c62828}
   .st .fld>label{color:#ffcdd0}
   .badge.st{background:rgba(229,72,77,.2); color:#ffb3b5; margin-right:4px}
+  .btn.novo{display:inline-flex; align-items:center; gap:12px; font-size:19px; font-weight:900; letter-spacing:2.5px; padding:15px 26px}
+  .btn.novo .bist{width:46px; height:18px; flex:none}
+  .autores{margin-top:12px; color:var(--mut); font-size:13px; line-height:1.7}
+  .autores b{color:#cfe0f5}
   .creditos{text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; padding:18px 10px 8px;
        border-top:1px solid var(--line); margin-top:8px}
   .creditos b{color:#cfe0f5; font-weight:700}
@@ -743,6 +747,13 @@ function blocoSangueTotal(){
     + '<div style="margin-top:10px; text-align:right"><button class="tsm" data-a="st">desfazer acionamento</button></div>'
     + '</div>';
 }
+
+/* ícone de bisturi (lâmina + cabo), herda a cor do botão */
+const BISTURI = '<svg class="bist" viewBox="0 0 64 24" aria-hidden="true">'
+  + '<path d="M2 15 C10 5 22 4 30 8 L30 15 Z" fill="currentColor"/>'
+  + '<rect x="30" y="9.5" width="6" height="5" rx="1" fill="currentColor" opacity=".85"/>'
+  + '<rect x="36" y="9" width="26" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>'
+  + '</svg>';
 
 const SECOES = ["Identificação","Horários","iMIST-AMBO","Admissão","X-ABCDE","E-FAST","Hemostasia","Saída","Escores","Pós"];
 
@@ -1341,10 +1352,12 @@ function htmlLista(){
     + '<div class="stat"><div class="l">Neste mês</div><div class="v">'+lista0.filter(c=>String(c.data||"").slice(3)===mes).length+'</div></div>'
     + '</div>';
   h += '<div class="sec"><div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">'
-     + '<button class="btn p" data-a="novo" style="font-size:17px; padding:14px 22px">+ Paciente chegou — novo caso</button>'
+     + '<button class="btn p novo" data-a="novo">'+BISTURI+'<span>NOVO CASO</span></button>'
      + '<span class="sp" style="flex:1"></span>'
      + '<button class="btn" data-a="export">Exportar dados</button>'
      + '</div>'
+     + '<div class="autores"><div><b>Lucas Domingos Ribeiro</b> — R3 Cirurgia Geral <span style="white-space:nowrap">EPM | UNIFESP</span></div>'
+     + '<div><b>Marcos Vinícius Veanholi</b> — R2 Cirurgia Geral <span style="white-space:nowrap">EPM | UNIFESP</span></div></div>'
      + '<p class="hint" style="margin:10px 0 0">Não digite nome, prontuário ou iniciais neste aparelho. '
      + 'A ligação entre o código do estudo e o paciente fica no caderno de triagem da sala.</p></div>';
 
