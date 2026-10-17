@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ficha Trauma">
-<meta name="theme-color" content="#0c141f">
+<meta name="theme-color" content="#0a1f44">
 <link rel="manifest" href="manifest.json">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,11 +190,11 @@
     --navy:#dbe7f5;            /* texto de destaque (títulos) */
     --acc:#3b82d6; --acc2:#9cc3ef;
     --red:#e5484d; --green:#3fb950; --amber:#d4a72c;
-    --line:#2a3b55; --bg:#0c141f; --card:#131f30; --card2:#0f1926;
+    --line:#25467a; --bg:#0a1f44; --card:#11295a; --card2:#0d234c;
     --ink:#e6edf5; --mut:#8fa2bb;
   }
-  body{background:radial-gradient(1200px 500px at 50% -200px,#1a2b44 0%,var(--bg) 60%) fixed, var(--bg)}
-  .top{background:rgba(12,20,31,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  body{background:radial-gradient(900px 500px at 85% 0%, rgba(53,167,224,.10), transparent 70%) fixed, linear-gradient(160deg,#0a1f44 0%,#0d2550 100%) fixed, var(--bg)}
+  .top{background:rgba(10,31,68,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
        border-bottom:1px solid var(--line); gap:8px}
   .top .brand{display:flex; flex-direction:column; min-width:0; flex:1 1 auto; line-height:1.15}
   .top .brand b{font-size:14px; letter-spacing:1.4px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -205,13 +205,13 @@
        white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .logos{display:flex; gap:6px; align-items:center; flex:none}
   .logos img{height:30px; width:auto; border-radius:4px; background:#fff; padding:2px}
-  .top .chip{background:#1d2c43; color:var(--acc2); font-weight:700; letter-spacing:.4px; white-space:nowrap}
-  .btn{background:#1d2c43; color:var(--ink); border:1px solid var(--line)}
+  .top .chip{background:#183a75; color:var(--acc2); font-weight:700; letter-spacing:.4px; white-space:nowrap}
+  .btn{background:#183a75; color:var(--ink); border:1px solid var(--line)}
   .btn.p{background:#c62828; border-color:#c62828}
   .btn.g{background:#238636; border-color:#238636}
   .btn.o{border-color:#3a5070; color:#e6edf5; white-space:nowrap; padding:8px 11px; min-height:38px; font-size:13.5px}
 
-  .tabs{background:#0c141f; border-bottom:2px solid var(--acc); padding:4px 6px 0; gap:2px}
+  .tabs{background:#0a1f44; border-bottom:2px solid var(--acc); padding:4px 6px 0; gap:2px}
   .tabs button{background:transparent; color:var(--mut); border-radius:0; text-transform:uppercase;
        letter-spacing:1.2px; font-size:12.5px; font-weight:800; border-bottom:3px solid transparent; padding:12px 12px 9px}
   .tabs button.on{background:transparent; color:#fff; border-bottom-color:var(--acc)}
@@ -229,7 +229,7 @@
   .opt.on{background:var(--acc); border-color:var(--acc); color:#fff}
   .opt.on.warn{background:#c62828; border-color:#c62828}
   .opt.on.good{background:#238636; border-color:#238636}
-  .gcs .opt b{background:#1d2c43; color:var(--acc2)}
+  .gcs .opt b{background:#183a75; color:var(--acc2)}
   .gcs .opt.on b{background:#fff; color:var(--acc)}
 
   .fwin{background:var(--card2); border-color:var(--line)}
@@ -249,11 +249,11 @@
   .xrow.ok{border-color:#2f7d3e}
 
   .tcard{background:var(--card2); border-color:var(--line)}
-  .tcard.set{background:#16263d; border-color:var(--acc)}
+  .tcard.set{background:#15336b; border-color:var(--acc)}
   .tcard .tv{color:#fff}
   .tcard .tv.off{color:#41536d}
   button.tcard:not(.set):not(.na) .tv{color:#ff6b6f}
-  .tsm{background:#1d2c43; color:var(--ink)}
+  .tsm{background:#183a75; color:var(--ink)}
 
   .alert{text-align:justify; hyphens:auto; -webkit-hyphens:auto}
   .alert.r{background:rgba(229,72,77,.14); color:#ffb3b5; border-color:var(--red)}
@@ -265,7 +265,7 @@
   .score.a{background:rgba(212,167,44,.12); border-color:var(--amber)}
   .score .sv{color:#fff}
 
-  .foot{background:rgba(12,20,31,.96); border-top-color:var(--line)}
+  .foot{background:rgba(10,31,68,.96); border-top-color:var(--line)}
   .caso{background:var(--card2); border-color:var(--line)}
   .caso .id{color:#fff; font-variant-numeric:tabular-nums}
   .badge.open{background:rgba(212,167,44,.16); color:#f2cc60}
@@ -339,7 +339,7 @@
     .hero2 .h-kick{font-size:10.5px; letter-spacing:2px}
     .hero2 .h-sub{font-size:11.5px; letter-spacing:1.8px}
   }
-  .stat{position:relative; overflow:hidden; background:linear-gradient(180deg,#152439,#101b2b); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
+  .stat{position:relative; overflow:hidden; background:linear-gradient(180deg,#143066,#0f2654); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
   .stat::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px}
   .stat .v{font-size:36px; color:#fff}
   .s-g::before{background:var(--green)} .s-g .v{color:#57d66a}
@@ -420,7 +420,7 @@
   .cola summary,.aiscola summary{cursor:pointer; font-weight:800; color:var(--acc2)}
   .cola ol{margin:8px 0 6px; padding-left:20px; line-height:1.6; color:#cdd9ea; font-size:14px}
   .aisleg{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
-  .aisleg span{background:#16263d; border-radius:8px; padding:6px 10px; font-size:13px; color:#cdd9ea}
+  .aisleg span{background:#15336b; border-radius:8px; padding:6px 10px; font-size:13px; color:#cdd9ea}
   .aisleg small{display:block; color:var(--mut); font-size:11px}
   .aisreg{border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; margin:10px 0; background:var(--card2)}
   .aisreg.alto{border-color:var(--red); background:rgba(229,72,77,.06)}
@@ -429,7 +429,7 @@
   .aisbtns .opt{flex-direction:column; justify-content:center; text-align:center; padding:6px 2px; min-width:0}
   .aisbtns .opt b{font-size:18px} .aisbtns .opt small{font-size:10.5px; opacity:.8}
   @media(max-width:520px){ .aisbtns{grid-template-columns:repeat(4,1fr)} }
-  .aisex{margin-top:8px; font-size:13.5px; color:#cdd9ea; background:#16263d; border-radius:8px; padding:8px 10px}
+  .aisex{margin-top:8px; font-size:13.5px; color:#cdd9ea; background:#15336b; border-radius:8px; padding:8px 10px}
   .aiscola{margin-top:6px} .aiscola ul{margin:6px 0 0; padding-left:18px; font-size:13px; line-height:1.55; color:#b8c6d8}
   .trissin{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:6px 0 10px}
   @media(max-width:620px){ .trissin{grid-template-columns:repeat(2,1fr)} }
