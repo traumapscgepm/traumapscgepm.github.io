@@ -2377,6 +2377,10 @@ function ligar(){
         set(el.dataset.k, el.value);
         /* atualiza só o bloco de cálculo — nunca redesenha o formulário
            enquanto alguém digita, sob pena de perder o valor e fechar o teclado */
+        /* X-ABCDE: a frase-padrão acompanha a digitação de FR, SpO2, PA e FC */
+        if(/^adm_(fr|spo2|pas|pad|fc)$/.test(el.dataset.k)){
+          app.querySelectorAll(".xrow .xnorm").forEach((x,ix)=>{ if(XABCDE[ix]) x.innerHTML = fraseX(XABCDE[ix][2]); });
+        }
         const prev = document.getElementById("notaPrev");
         if(prev) prev.textContent = notaTasy();
         const alvo = document.getElementById("calc-adm");
@@ -2397,7 +2401,6 @@ function ligar(){
       if(el.dataset.k==="h_trauma") el.addEventListener("change", ()=> render());
       if(el.dataset.k==="velocidade") el.addEventListener("change", ()=>{ aplicarVelocidade(); render(); });
       if(el.dataset.k==="efast_sinfise_cm") el.addEventListener("change", ()=>{ sincronizarExameX(); render(); });
-      if(aba===4 && /^adm_(fr|spo2|pas|pad|fc)$/.test(el.dataset.k)) el.addEventListener("change", ()=>{ render(); });
       if(el.dataset.k==="t_ch" || el.dataset.k==="t_st") el.addEventListener("change", ()=>{ salvar(); render(); });
     }
   });
