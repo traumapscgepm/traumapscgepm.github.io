@@ -538,7 +538,7 @@ function fraseX(frase){
   const fast = get("efast_global");
   const vals = {
     fr: v("adm_fr"), spo2: v("adm_spo2"), fc: v("adm_fc"),
-    pa: (get("adm_pas")||get("adm_pad")) ? v("adm_pas")+"x"+v("adm_pad")+" mmHg" : "__",
+    pa: paInaud("adm") ? "inaudível" : (get("adm_pas")||get("adm_pad")) ? v("adm_pas")+"x"+v("adm_pad")+" mmHg" : "__",
     /* LS e FAST só aparecem depois do exame — nunca presumidos */
     fast: fast ? esc(fast.toLowerCase()) : "__",
     ls: lsTexto(),
@@ -799,7 +799,7 @@ const TCCI_GRUPOS = [
     ["Circunstâncias desconhecidas", null]]],
   ["Sinais vitais iniciais", [
     ["Glasgow < 10", ()=>{ const g=gcsTotal(); return (g!==null && g<10) || algumVital(["cena_gcs"], v=>v<10); }],
-    ["PAS < 80 mmHg", ()=>algumVital(["cena_pas","adm_pas"], v=>v<80)],
+    ["PAS < 80 mmHg", ()=>paInaud("cena") || paInaud("adm") || algumVital(["cena_pas","adm_pas"], v=>v<80)],
     ["FR < 10 ou > 29 irpm", ()=>algumVital(["cena_fr","adm_fr"], v=>v<10||v>29)],
     ["SatO2 < 90% (ou < 85% acima de 75 anos)", ()=>{ const lim=(num("idade")||0)>75?85:90; return algumVital(["cena_spo2","adm_spo2"], v=>v<lim); }]]],
   ["Padrão de lesão", [
@@ -1144,7 +1144,19 @@ function gcsTotal(){
   const o=+get("gcs_o")||0, v=+get("gcs_v")||0, m=+get("gcs_m")||0;
   return (o&&v&&m) ? o+v+m : null;
 }
+/* PA inaudível: PAS conta como 0 (RTS código 0) e o Shock Index é considerado > 1,0 */
+function paInaud(p){ return !!get(p+"_pa_inaud"); }
+function siCritico(){ const si=shockIndex(); return paInaud("adm") || (si!==null && si>1); }
+function camposPA(p, lS, lD){
+  const on = paInaud(p);
+  return (on ? '<div class="fld" style="grid-column:span 2"><label>Pressão arterial</label><div class="alert r" style="margin:0">PA inaudível</div></div>'
+             : fTexto(p+"_pas",lS,"","number") + fTexto(p+"_pad",lD,"","number"));
+}
+function botaoInaud(p){
+  return '<div class="opts" style="margin:6px 0 4px">'+fBool(p+"_pa_inaud","PA inaudível","warn")+'</div>';
+}
 function shockIndex(){
+  if(paInaud("adm")) return null;
   const fc=+get("adm_fc"), pas=+get("adm_pas");
   if(!fc||!pas) return null;
   return Math.round((fc/pas)*100)/100;
@@ -1174,7 +1186,7 @@ function rabtPontos(){
   let n=0;
   if(rabtTorso()) n++;
   if(get("efast_global")==="Positivo") n++;
-  const si=shockIndex(); if(si!==null && si>1) n++;
+  if(siCritico()) n++;
   if(get("rabt_pelve")) n++;
   return n;
 }
@@ -1201,7 +1213,7 @@ function rtsCodificado(){
   const pasRaw = get("adm_pas"), frRaw = get("adm_fr");
   const pas = +pasRaw, fr = +frRaw;
   const cg = (g===null) ? null : (g>=13?4 : g>=9?3 : g>=6?2 : g>=4?1 : 0);
-  const cp = (pasRaw===undefined||pasRaw===""||isNaN(pas)) ? null
+  const cp = paInaud("adm") ? 0 : (pasRaw===undefined||pasRaw===""||isNaN(pas)) ? null
            : (pas>89?4 : pas>=76?3 : pas>=50?2 : pas>=1?1 : 0);
   const cr = (frRaw===undefined||frRaw===""||isNaN(fr)) ? null
            : ((fr>=10&&fr<=29)?4 : fr>29?3 : fr>=6?2 : fr>=1?1 : 0);
@@ -1327,6 +1339,7 @@ function parseAPH(){
   function vitaisCena(t){
     let m;
     if(m=t.match(rxPA)){ poe("cena_pas",m[1],"PA cena "+m[1]+"x"+m[2]); poe("cena_pad",m[2]); }
+    else if(/\bpa\b\W{0,3}inaudivel|inaudivel/.test(t)) poe("cena_pa_inaud",true,"PA cena inaudível");
     if(m=t.match(rxFC))  poe("cena_fc",m[1],"FC cena "+m[1]);
     if(m=t.match(rxFR))  poe("cena_fr",m[1],"FR cena "+m[1]);
     if(m=t.match(rxSAT)) poe("cena_spo2",m[1],"SatO2 cena "+m[1]);
@@ -1433,6 +1446,7 @@ function parseAPH(){
     }
     if(letra==="c"){
       if(m=t.match(rxPA)){ poe("adm_pas",m[1],"PA admissão "+m[1]+"x"+m[2]); poe("adm_pad",m[2]); }
+      else if(/inaudivel/.test(t)) poe("adm_pa_inaud",true,"PA admissão inaudível");
       if(m=t.match(rxFC))  poe("adm_fc",m[1],"FC admissão "+m[1]);
       if(/\bfast\b\s*(?:\(?\s*-\s*\)?|negativo)/.test(t)) poe("efast_global","Negativo","FAST negativo");
       else if(/\bfast\b\s*(?:\(?\s*\+\s*\)?|positivo)/.test(t)) poe("efast_global","Positivo","FAST positivo");
@@ -1805,10 +1819,10 @@ function secCena(){
    + fRadio("cena_sv","Sinais vitais",["Presentes","Ausentes"])
    + (get("cena_sv")==="Ausentes" ? blocoPCR() :
       '<div class="grid g6" style="margin-top:10px">'
-      + fTexto("cena_pas","PAS","","number") + fTexto("cena_pad","PAD","","number")
+      + camposPA("cena","PAS","PAD")
       + fTexto("cena_fc","FC","","number") + fTexto("cena_fr","FR","","number")
       + fTexto("cena_spo2","SpO₂ %","","number") + fTexto("cena_gcs","GCS","","number")
-      + '</div>')
+      + '</div>' + botaoInaud("cena"))
    + '</div>'
 
    + '<div class="sec"><h2>T · Transporte</h2>'
@@ -1842,18 +1856,19 @@ function calcAdmHTML(){
      + ' (O'+get("gcs_o")+' V'+get("gcs_v")+' M'+get("gcs_m")+') — TCE '+gcsGravidade(g)+'</div>';
   else if(gcsTemNT()) h += '<div class="alert a">Glasgow com item não testável ('+gcsDescr()+') — total não calculado; '
      + 'RTS e TRISS ficam sem o componente neurológico.</div>';
-  if(si!==null) h += '<div class="alert '+(si>=1?"r":"g")+'">Shock Index '+si.toFixed(2)+(si>=1?" — perfusão comprometida, considere critérios de transfusão maciça":"")+'</div>';
+  if(paInaud("adm")) h += '<div class="alert r">PA inaudível — Shock Index considerado &gt; 1,0; considere critérios de transfusão maciça</div>';
+  else if(si!==null) h += '<div class="alert '+(si>=1?"r":"g")+'">Shock Index '+si.toFixed(2)+(si>=1?" — perfusão comprometida, considere critérios de transfusão maciça":"")+'</div>';
   return h;
 }
 function secAdmissao(){
   let h = '<div class="sec"><h2>Sinais vitais na admissão</h2>'
    + '<p class="hint" style="margin:-4px 0 12px">Primeira aferição, antes do volume. Não é o valor estabilizado.</p>'
    + '<div class="grid g4">'
-   + fTexto("adm_pas","PA sistólica","","number") + fTexto("adm_pad","PA diastólica","","number")
+   + camposPA("adm","PA sistólica","PA diastólica")
    + fTexto("adm_fc","FC","","number") + fTexto("adm_fr","FR","","number")
    + fTexto("adm_spo2","SpO₂ %","","number") + fTexto("adm_tax","Temperatura °C","","number")
    + fTexto("adm_tec","TEC (s)","","number") + fTexto("adm_dextro","Dextro","","number")
-   + '</div>'
+   + '</div>' + botaoInaud("adm")
    + '<h2 style="margin-top:16px">Escala de Coma de Glasgow</h2>'
    + '<p class="hint" style="margin:-4px 0 10px">Melhor resposta em cada item. Total de 3 a 15.</p>'
    + '<div class="grid gcsg">' + fGcs("gcs_o") + fGcs("gcs_v") + fGcs("gcs_m") + '</div>'
@@ -1890,7 +1905,7 @@ function secXabcde(){
         + gcsSelect("gcs_o","Glasgow O · ocular") + gcsSelect("gcs_v","Glasgow V · verbal") + gcsSelect("gcs_m","Glasgow M · motora")
         + '<div class="fld"><label>Total</label><div class="gtot">'+(gcsTotal()!==null?gcsTotal():(gcsTemNT()?"NT":"—"))+'</div></div>'
         + '</div>';
-    if(k==="c") h += '<div class="grid g4" style="margin:4px 0 8px">'+fTexto("adm_pas","PA sistólica","","number")+fTexto("adm_pad","PA diastólica","","number")+fTexto("adm_fc","FC (bpm)","","number")+'</div>' + botoesFAST() + botoesPlus();
+    if(k==="c") h += '<div class="grid g4" style="margin:4px 0 8px">'+camposPA("adm","PA sistólica","PA diastólica")+fTexto("adm_fc","FC (bpm)","","number")+'</div>' + botaoInaud("adm") + botoesFAST() + botoesPlus();
     if(conflitoX(k)) h += '<div class="alert a" style="margin:4px 0 6px">'+conflitoX(k)+'</div>';
     /* campo sempre à mão: escrever nele já marca a letra como ALTERADO */
     h += fArea(k+"_alterado","Alterações em "+L,"em branco se normal — descreva aqui o que fugiu do padrão");
@@ -1938,12 +1953,12 @@ function secHemo(){
    + '</div>';
 
   const siH = shockIndex();
-  const siPos = siH!==null && siH>1;
+  const siPos = siCritico();
     h += '<div class="sec"><h2>RABT — gatilho de transfusão maciça</h2><div class="opts">'
    + '<button class="opt '+(rabtTorso()?"on warn":"")+'" data-a="torso">Ferimento penetrante em torso'+(rabtTorso()?" ✓":"")+'</button>'
    + '<button class="opt '+(get("efast_global")==="Positivo"?"on warn":"")+'" style="pointer-events:none; opacity:.9">FAST positivo'+(get("efast_global")==="Positivo"?" ✓":"")+'</button>'
    + '<button class="opt '+(siPos?"on warn":"")+'" style="pointer-events:none; opacity:.9">Shock Index &gt; 1,0'
-     +(siH!==null?" ("+siH.toFixed(2)+")":"")+(siPos?" ✓":"")+'</button>'
+     +(paInaud("adm")?" (PA inaudível)":siH!==null?" ("+siH.toFixed(2)+")":"")+(siPos?" ✓":"")+'</button>'
    + fBool("rabt_pelve","Fratura de pelve (suspeita ou confirmada)","warn")
    + '</div>'
    + (cenaContusa() ? '<p class="hint" style="margin:6px 0 0">Cena registrou trauma contuso: o critério de ferimento penetrante em torso não pontua.</p>' : "")
@@ -2000,13 +2015,14 @@ function secEscores(){
   let h = '<div class="sec"><h2>Na sala — calculados automaticamente</h2>';
 
   h += '<div class="grid g2">';
-  h += '<div class="score '+(si===null?"":(si>=1?"r":"g"))+'"><div class="sl">Shock Index</div>'
-     + '<div class="sv">'+(si===null?"—":si.toFixed(2))+'</div>'
-     + '<div class="sd">'+(si===null?"Precisa de FC e PA sistólica"
+  const inaud = paInaud("adm");
+  h += '<div class="score '+(inaud?"r":si===null?"":(si>=1?"r":"g"))+'"><div class="sl">Shock Index</div>'
+     + '<div class="sv">'+(inaud?"&gt; 1":si===null?"—":si.toFixed(2))+'</div>'
+     + '<div class="sd">'+(inaud?"PA inaudível — choque":si===null?"Precisa de FC e PA sistólica"
         : (si>=1?"≥ 1,0 — perfusão comprometida":"Abaixo de 1,0"))+'</div></div>';
   const rbItens = [rabtTorso()?"penetrante em torso":null,
                    get("efast_global")==="Positivo"?"FAST+":null,
-                   (si!==null&&si>1)?"Shock Index > 1,0":null,
+                   siCritico()?(paInaud("adm")?"PA inaudível (SI > 1,0)":"Shock Index > 1,0"):null,
                    get("rabt_pelve")?"fratura de pelve":null].filter(Boolean).join(" · ");
   h += '<div class="score '+(rb>=2?"r":"g")+'"><div class="sl">RABT</div>'
      + '<div class="sv">'+rb+' / 4</div>'
@@ -2186,14 +2202,14 @@ function notaTasy(){
   const si = shockIndex(), r = rtsW(), i = iss(), ps = triss();
   add("", "PROTOCOLO TRAUMA",
       "RTS "+(r===null?"—":nf1(r,2)+" (T-RTS "+rtsT()+")")+" // ISS "+(i===null?"—":i)+" // TRISS "+(ps===null?"—":"Ps "+nf1(ps,1)+"%")
-      +" // SI "+(si===null?"—":nf1(si,2))+" // RABT "+rabtPontos(), "");
+      +" // SI "+(paInaud("adm")?"> 1 (PA inaudível)":si===null?"—":nf1(si,2))+" // RABT "+rabtPontos(), "");
   // iMIST
   const mec = [lista("mecanismo"), v("mecanismo_outro"), v("velocidade")?v("velocidade")+" km/h":"", v("queda_altura")?"queda de "+v("queda_altura")+" m":"",
                tipoTxt()?"trauma "+tipoTxt():"", lista("agravantes")?"agravantes: "+lista("agravantes").toLowerCase():""].filter(Boolean).join("; ");
   let sv;
   if(v("cena_sv")==="Ausentes") sv = "Sinais vitais ausentes — "+(v("pcr_chegada")==="Sim"?"chegou em PCR":"RCE antes da chegada")
       +(v("pcr_assistida")?", PCR assistida: "+v("pcr_assistida").toLowerCase():"")+(v("pcr_tempo_min")?", parado(a) há "+v("pcr_tempo_min")+(v("pcr_tempo_min")==="Desconhecido"?"":" min"):"");
-  else sv = [v("cena_pas")?"PA "+v("cena_pas")+"x"+(v("cena_pad")||"__")+" mmHg":"", v("cena_fc")?"FC "+v("cena_fc")+" bpm":"", v("cena_fr")?"FR "+v("cena_fr")+" irpm":"",
+  else sv = [paInaud("cena")?"PA inaudível":v("cena_pas")?"PA "+v("cena_pas")+"x"+(v("cena_pad")||"__")+" mmHg":"", v("cena_fc")?"FC "+v("cena_fc")+" bpm":"", v("cena_fr")?"FR "+v("cena_fr")+" irpm":"",
              v("cena_spo2")?"SatO2 "+v("cena_spo2")+"%":"", v("cena_gcs")?"Glasgow "+v("cena_gcs"):""].filter(Boolean).join(", ");
   add("I: "+[v("idade")?v("idade")+" anos":"", sexo].filter(Boolean).join(", "),
       "M: "+mec, "I: "+v("injurias"), "S: "+sv, "T: "+v("transporte"), "T: "+v("aph_tempo"),
@@ -2315,7 +2331,10 @@ function ligar(){
         if(k==="agravantes" && v==="Alta velocidade") delete caso()._imp_vel;  /* escolha manual prevalece */
         return render();
       }
-      if(a==="bool"){ if(k==="rabt_pelve") delete caso()._imp_pelve; set(k, get(k) ? undefined : true); return render(); }
+      if(a==="bool"){ if(k==="rabt_pelve") delete caso()._imp_pelve;
+        const mi = /^(cena|adm)_pa_inaud$/.exec(k);
+        if(mi && !get(k)){ const c=caso(); delete c[mi[1]+"_pas"]; delete c[mi[1]+"_pad"]; }
+        set(k, get(k) ? undefined : true); return render(); }
       if(a==="agora"){
         if(get(k)) return render();               /* toque duplo não sobrescreve */
         const c = caso(); const agora = new Date();
