@@ -439,6 +439,8 @@
   .trisstab{width:100%; border-collapse:collapse; font-size:13px; color:#cdd9ea}
   .trisstab th,.trisstab td{border-bottom:1px solid var(--line); padding:6px 4px; text-align:center}
   .trisstab td:first-child{text-align:left; font-weight:700}
+  .gsel{width:100%; min-height:44px; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--card2); color:var(--ink); font-size:15px}
+  .gtot{min-height:44px; display:flex; align-items:center; font-size:24px; font-weight:800; color:#fff}
   .notabtns{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px}
   .notabtns .novo{font-size:16px; letter-spacing:1px}
   .notaprev{white-space:pre-wrap; overflow-wrap:anywhere; background:#fdf6e3; color:#1d1d1d; border-radius:12px; padding:16px 18px; font:14px/1.55 "Manrope",system-ui,sans-serif;
@@ -529,7 +531,7 @@ const XABCDE = [
    ["Sinais de hipertensão intracraniana","Neurocirurgia acionada"]],
   ["E","e","Dorso sem desalinhamento e sem lesões cutâneas. Controle térmico. Pulsos 4/4+ presentes bilateralmente. "
          + "Sem dor à palpação de ossos longos. Sem dor à palpação de coluna.",
-   ["Manta térmica","Fluido aquecido","Nenhum aquecimento"]]
+   ["Manta térmica","Fluido aquecido","Nenhum aquecimento","Ortopedia acionada"]]
 ];
 function fraseX(frase){
   const v = k => { const x = get(k); return (x===undefined || x==="") ? "__" : esc(x); };
@@ -733,11 +735,18 @@ function fGcs(k){
 const GCS_NT = { gcs_o:"ex.: edema palpebral, trauma ocular", gcs_v:"ex.: intubado, traqueostomia", gcs_m:"ex.: sedação, curarização, lesão medular" };
 function gcsTemNT(){ return ["gcs_o","gcs_v","gcs_m"].some(k=>get(k)==="NT"); }
 function gcsDescr(){ return "O"+(get("gcs_o")||"?")+" V"+(get("gcs_v")||"?")+" M"+(get("gcs_m")||"?"); }
+function gcsSelect(k,rot){
+  const [, itens] = GCS[k];
+  return '<div class="fld"><label>'+rot+'</label><select data-k="'+k+'" class="gsel"><option value="">—</option>'
+    + itens.concat([["NT","Não testável"]]).map(([v,nome])=>'<option value="'+v+'"'+(get(k)===v?" selected":"")+'>'+v+' · '+nome+'</option>').join("")
+    + '</select></div>';
+}
 function gcsGravidade(g){ return g<=8 ? "grave — considerar via aérea definitiva" : (g<=12 ? "moderado" : "leve"); }
 
 /* ácido tranexâmico — esquemas do serviço */
-const ATX_ESQUEMAS = ["1 g IV em 10 min + 1 g IV em dripping","2 g IV em bolus","1 g IV em bolus","Outro"];
-const ATX_LEGADO = {"1 g em 10 min + 1 g em 8 h":"1 g IV em 10 min + 1 g IV em dripping",
+const ATX_ESQUEMAS = ["1 g IV em bolus","1 g IV em bolus + 1 g IV em dripping em 8 h","2 g IV em bolus","Outro"];
+const ATX_LEGADO = {"1 g em 10 min + 1 g em 8 h":"1 g IV em bolus + 1 g IV em dripping em 8 h",
+                    "1 g IV em 10 min + 1 g IV em dripping":"1 g IV em bolus + 1 g IV em dripping em 8 h",
                     "2 g em bolus único":"2 g IV em bolus","1 g dose única":"1 g IV em bolus"};
 
 /* cálcio: 1 ampola para cada 2 concentrados de hemácias */
@@ -1837,6 +1846,10 @@ function secXabcde(){
        + '<button class="btn-alt '+(st==="A"?"on":"")+'" data-a="xalt" data-k="'+k+'">'+(st==="A"?"ALTERADO ✓":"ALTERADO")+'</button>'
        + '</div></div>';
     if(k==="b") h += '<div class="grid g4" style="margin:4px 0 8px">'+fTexto("adm_fr","FR (irpm)","","number")+fTexto("adm_spo2","SpO₂ (%) em aa","","number")+'</div>' + botoesLS();
+    if(k==="d") h += '<div class="grid g4" style="margin:4px 0 8px">'
+        + gcsSelect("gcs_o","Glasgow O · ocular") + gcsSelect("gcs_v","Glasgow V · verbal") + gcsSelect("gcs_m","Glasgow M · motora")
+        + '<div class="fld"><label>Total</label><div class="gtot">'+(gcsTotal()!==null?gcsTotal():(gcsTemNT()?"NT":"—"))+'</div></div>'
+        + '</div>';
     if(k==="c") h += '<div class="grid g4" style="margin:4px 0 8px">'+fTexto("adm_pas","PA sistólica","","number")+fTexto("adm_pad","PA diastólica","","number")+fTexto("adm_fc","FC (bpm)","","number")+'</div>' + botoesFAST() + botoesPlus();
     if(conflitoX(k)) h += '<div class="alert a" style="margin:4px 0 6px">'+conflitoX(k)+'</div>';
     /* campo sempre à mão: escrever nele já marca a letra como ALTERADO */
@@ -1874,8 +1887,8 @@ function secHemo(){
   let h = blocoSangueTotal()
    + '<div class="sec"><h2>Ácido tranexâmico</h2>'
    + fRadio("atx","Situação",["Feito","Não feito"])
-   + (get("atx")==="Feito" ? '<div style="margin-top:10px">'
-        + fRadio("atx_esquema","Esquema utilizado",ATX_ESQUEMAS)
+   + (get("atx")!=="Não feito" ? '<div style="margin-top:10px">'
+        + fRadio("atx_esquema","Como foi feito (Transamin)",ATX_ESQUEMAS)
         + (get("atx_esquema")==="Outro" ? '<div style="margin-top:8px">'+fTexto("atx_outro","Qual esquema")+'</div>' : "")
         + '</div>' : "")
    + (get("atx")==="Não feito" ? '<div style="margin-top:10px">'
@@ -2243,6 +2256,7 @@ function ligar(){
       if(a==="aba"){ aba = +i; return render(); }
       if(a==="radio"){
         set(k, get(k)===v ? undefined : v);
+        if(k==="atx_esquema" && get(k)) set("atx","Feito");
         if(/^efast_ls_[de]$/.test(k) || /^fast_/.test(k) || k==="efast_sinfise_cm") sincronizarExameX();
         return render();
       }
@@ -2348,6 +2362,9 @@ function ligar(){
       if(a==="notakeep"){ enviarKeep(); return; }
       if(a==="export") return exportar();
     });
+  });
+  app.querySelectorAll("select[data-k]").forEach(el=>{
+    el.addEventListener("change", ()=>{ set(el.dataset.k, el.value||undefined); const y=scrollY; render(); scrollTo(0,y); });
   });
   app.querySelectorAll("[data-k]").forEach(el=>{
     if(el.tagName==="INPUT" || el.tagName==="TEXTAREA"){
