@@ -521,7 +521,7 @@ const XABCDE = [
    ["IOT","Cricotireoidostomia","Cânula orofaríngea"]],
   ["B","b","FR: {fr} irpm. SO2: {spo2}% aa. MV presente bilateralmente, sem ruídos adventícios. Expansibilidade torácica simétrica, sem enfisema de subcutâneo. "
          + "E-FAST com {ls}, sem outros achados.",
-   ["Dreno à direita","Dreno à esquerda","Descompressão por agulha"]],
+   ["Dreno à direita","Dreno à esquerda","Descompressão torácica imediata"]],
   ["C","c","PA: {pa}, FC {fc} bpm, sem dor à palpação abdominal e sem dor à palpação de ossos longos, "
          + "pelve estável, TEC < 3 segundos, BCNF. FAST {fast}.",
    ["Cinta pélvica","Acesso intraósseo","Acesso central"]],
@@ -995,6 +995,7 @@ function normalizarCaso(c){
     c.calcio_reposto = "Sim";
     if(c.calcio_tipo) c.calcio_sal = /gluconato/i.test(c.calcio_tipo) ? "Gluconato de cálcio" : "Cloreto de cálcio";
   }
+  if(Array.isArray(c.b_int)) c.b_int = c.b_int.map(x=> x==="Descompressão por agulha" ? "Descompressão torácica imediata" : x);
   if(c.atx_esquema && ATX_LEGADO[c.atx_esquema]) c.atx_esquema = ATX_LEGADO[c.atx_esquema];
   if(typeof c.mecanismo==="string") c.mecanismo = [c.mecanismo];
   if(Array.isArray(c.mecanismo)) c.mecanismo = c.mecanismo.map(m=> m==="Moto" ? "Colisão moto" : m);
@@ -1835,8 +1836,8 @@ function secXabcde(){
        + '<button class="btn-norm '+(st==="N"?"on":"")+'" data-a="xnorm" data-k="'+k+'">'+(st==="N"?"NORMAL ✓":"NORMAL")+'</button>'
        + '<button class="btn-alt '+(st==="A"?"on":"")+'" data-a="xalt" data-k="'+k+'">'+(st==="A"?"ALTERADO ✓":"ALTERADO")+'</button>'
        + '</div></div>';
-    if(k==="b") h += botoesLS();
-    if(k==="c") h += botoesFAST() + botoesPlus();
+    if(k==="b") h += '<div class="grid g4" style="margin:4px 0 8px">'+fTexto("adm_fr","FR (irpm)","","number")+fTexto("adm_spo2","SpO₂ (%) em aa","","number")+'</div>' + botoesLS();
+    if(k==="c") h += '<div class="grid g4" style="margin:4px 0 8px">'+fTexto("adm_pas","PA sistólica","","number")+fTexto("adm_pad","PA diastólica","","number")+fTexto("adm_fc","FC (bpm)","","number")+'</div>' + botoesFAST() + botoesPlus();
     if(conflitoX(k)) h += '<div class="alert a" style="margin:4px 0 6px">'+conflitoX(k)+'</div>';
     /* campo sempre à mão: escrever nele já marca a letra como ALTERADO */
     h += fArea(k+"_alterado","Alterações em "+L,"em branco se normal — descreva aqui o que fugiu do padrão");
@@ -2374,6 +2375,7 @@ function ligar(){
       if(el.dataset.k==="h_trauma") el.addEventListener("change", ()=> render());
       if(el.dataset.k==="velocidade") el.addEventListener("change", ()=>{ aplicarVelocidade(); render(); });
       if(el.dataset.k==="efast_sinfise_cm") el.addEventListener("change", ()=>{ sincronizarExameX(); render(); });
+      if(aba===4 && /^adm_(fr|spo2|pas|pad|fc)$/.test(el.dataset.k)) el.addEventListener("change", ()=>{ const y=scrollY; render(); scrollTo(0,y); });
       if(el.dataset.k==="t_ch" || el.dataset.k==="t_st") el.addEventListener("change", ()=>{ salvar(); render(); });
     }
   });
