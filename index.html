@@ -438,6 +438,10 @@
   .trisstab{width:100%; border-collapse:collapse; font-size:13px; color:#cdd9ea}
   .trisstab th,.trisstab td{border-bottom:1px solid var(--line); padding:6px 4px; text-align:center}
   .trisstab td:first-child{text-align:left; font-weight:700}
+  .notabtns{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+  .notabtns .novo{font-size:16px; letter-spacing:1px}
+  .notaprev{white-space:pre-wrap; overflow-wrap:anywhere; background:#fdf6e3; color:#1d1d1d; border-radius:12px; padding:16px 18px; font:14px/1.55 "Manrope",system-ui,sans-serif;
+     max-height:70vh; overflow:auto; border-left:6px solid #f4b400; margin:0}
   .issconta{font-size:15px; margin-bottom:4px; color:#fff}
   .creditos{text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; padding:18px 10px 8px;
        border-top:1px solid var(--line); margin-top:8px}
@@ -888,7 +892,7 @@ const BISTURI = '<svg class="bist" viewBox="0 0 64 24" aria-hidden="true">'
   + '<rect x="36" y="9" width="26" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>'
   + '</svg>';
 
-const SECOES = ["Identificação","Horários","iMIST-AMBO","Admissão","X-ABCDE","FAST-PLUS","Hemostasia","Saída","Escores","Pós"];
+const SECOES = ["Identificação","Horários","iMIST-AMBO","Admissão","X-ABCDE","FAST-PLUS","Hemostasia","Saída","Escores","Pós","Nota Tasy"];
 
 /* ---------- AIS por região do ISS: abrangência + cola de exemplos ----------
    Exemplos aproximados (AIS 2005/2008, AAAM). Para codificação de pesquisa, conferir no manual oficial. */
@@ -1592,7 +1596,7 @@ function htmlFicha(){
   let h = '<div class="tabs">';
   SECOES.forEach((s,i)=>{ h += '<button data-a="aba" data-i="'+i+'" class="'+(i===aba?"on":"")+'">'+s+'</button>'; });
   h += '</div><div class="wrap">';
-  h += [secId, secHorarios, secCena, secAdmissao, secXabcde, secFast, secHemo, secSaida, secEscores, secPos][aba]();
+  h += [secId, secHorarios, secCena, secAdmissao, secXabcde, secFast, secHemo, secSaida, secEscores, secPos, secNota][aba]();
   h += '</div>';
   return h;
 }
@@ -2092,6 +2096,131 @@ function secPos(){
   return h;
 }
 
+/* ============================ NOTA PARA O TASY (Google Keep) ============================
+   Monta o texto no formato da nota do serviço, a partir de tudo que foi preenchido.
+   Nome e AT nunca entram no app: ficam como lacuna para completar no Keep/Tasy. */
+const NOTA_CONDUTAS = [
+  "Solicito TC de crânio, tórax, abdome, pelve, coluna cervical, coluna torácica e coluna lombar",
+  "Solicito exames laboratoriais","Solicito avaliação da Ortopedia","Solicito avaliação da Neurocirurgia",
+  "Prescrevo sintomáticos otimizados","Vigilância clínica","Aguardo acompanhantes para boletim médico",
+  "Encaminho ao centro cirúrgico","Alta da cirurgia geral"];
+const NOTA_MODELOS = {
+  nota_reav: "Reavalio paciente que foi mantido em observação na sala de emergência, após ser submetido a exames complementares e analgesia endovenosa.\n"
+    + "Permanece estável clínica e hemodinamicamente, sem sinais de alarme, sem novas queixas. Afirma controle álgico após analgesia prescrita. "
+    + "Aos exames, sem lesões cirúrgicas abordáveis pela equipe da cirurgia geral.",
+  nota_localizado: "- Paciente vítima de trauma contuso com TCE leve sem sinais de gravidade. Atendido em conjunto com equipe da emergência. "
+    + "Ao exame físico e de imagem (FAST) sem evidência de trauma torácico, abdominal ou pélvico.\n"
+    + "- Prescrevo sintomáticos otimizados.\n- Solicito avaliação de ortopedia para trauma de extremidades.\n- Alta da cirurgia geral.\n"
+    + "- Converso com paciente sobre impressões da equipe e possibilidades diagnósticas bem como propedêutica a seguir. Ciente e concordante com condutas médicas."
+};
+function semHTML(h){ const d=document.createElement("div"); d.innerHTML=h; return d.textContent.replace(/__/g,"").replace(/\s+([.,])/g,"$1"); }
+function lista(k){ const a=get(k); return Array.isArray(a) ? a.join(", ") : (a||""); }
+function nf1(x,d){ return x===null||x===undefined ? "—" : String((+x).toFixed(d)).replace(".",","); }
+function notaTasy(){
+  const L = [], add = (...x)=>L.push(...x), v = k => (get(k)===undefined||get(k)==="") ? "" : String(get(k));
+  const sexo = v("sexo")==="M" ? "masculino" : (v("sexo")==="F" ? "feminino" : "");
+  add("DAH: "+(v("data")||hojeBR())+(v("h_porta")&&v("h_porta")!=="NA" ? " · porta "+v("h_porta") : ""), "PENDÊNCIAS:"+(v("nota_pend")?" "+v("nota_pend"):""), "",
+      "==============================================", "# PS CIRURGIA GERAL #", "", "# ID:",
+      "[NOME], "+(v("idade")?v("idade")+" anos":"__ anos")+(sexo?", "+sexo:"")+", AT [______]"+(v("peso")?" · peso "+v("peso")+" kg":""),
+      "Código do estudo: "+(v("id")||"—"), "", "# HD:");
+  add(v("hd") || ("Vítima de trauma "+(v("mecanismo_tipo")||"").toLowerCase()+(lista("mecanismo")?" — "+lista("mecanismo").toLowerCase():"")));
+  // protocolo
+  const si = shockIndex(), r = rtsW(), i = iss(), ps = triss();
+  add("", "PROTOCOLO TRAUMA",
+      "RTS "+(r===null?"—":nf1(r,2)+" (T-RTS "+rtsT()+")")+" // ISS "+(i===null?"—":i)+" // TRISS "+(ps===null?"—":"Ps "+nf1(ps,1)+"%")
+      +" // SI "+(si===null?"—":nf1(si,2))+" // RABT "+rabtPontos(), "");
+  // iMIST
+  const mec = [lista("mecanismo"), v("mecanismo_outro"), v("velocidade")?v("velocidade")+" km/h":"", v("queda_altura")?"queda de "+v("queda_altura")+" m":"",
+               v("mecanismo_tipo")?"trauma "+v("mecanismo_tipo").toLowerCase():"", lista("agravantes")?"agravantes: "+lista("agravantes").toLowerCase():""].filter(Boolean).join("; ");
+  let sv;
+  if(v("cena_sv")==="Ausentes") sv = "Sinais vitais ausentes — "+(v("pcr_chegada")==="Sim"?"chegou em PCR":"RCE antes da chegada")
+      +(v("pcr_assistida")?", PCR assistida: "+v("pcr_assistida").toLowerCase():"")+(v("pcr_tempo_min")?", parado(a) há "+v("pcr_tempo_min")+(v("pcr_tempo_min")==="Desconhecido"?"":" min"):"");
+  else sv = [v("cena_pas")?"PA "+v("cena_pas")+"x"+(v("cena_pad")||"__")+" mmHg":"", v("cena_fc")?"FC "+v("cena_fc")+" bpm":"", v("cena_fr")?"FR "+v("cena_fr")+" irpm":"",
+             v("cena_spo2")?"SatO2 "+v("cena_spo2")+"%":"", v("cena_gcs")?"Glasgow "+v("cena_gcs"):""].filter(Boolean).join(", ");
+  add("I: "+[v("idade")?v("idade")+" anos":"", sexo].filter(Boolean).join(", "),
+      "M: "+mec, "I: "+v("injurias"), "S: "+sv, "T: "+v("transporte"), "T: "+v("aph_tempo"),
+      "T: "+[lista("aph_fez"), v("aph_volume")?"volume "+v("aph_volume")+" mL":""].filter(Boolean).join("; "), "",
+      "A: "+v("alergia"), "M: "+(v("anticoag")==="Sim" ? "anticoagulante/antiagregante: "+(v("anticoag_qual")||"sim") : (v("anticoag")==="Não"?"nega anticoagulante/antiagregante":v("anticoag"))),
+      "B: "+v("comorbidades"), "O: "+[lista("marcadores"), v("outros_desc")].filter(Boolean).join("; "), "");
+  // X-ABCDE
+  XABCDE.forEach(([Lt,k,frase])=>{
+    const st = estadoX(k); let t = "";
+    if(st==="N") t = semHTML(fraseX(frase));
+    else if(st==="A") t = v(k+"_alterado") || "alterado";
+    add(Lt+": "+t);
+  });
+  // exames
+  const lab = v("nota_lab") || (tem("saida_aguarda","Aguarda exames laboratoriais") ? "Aguarda"+(v("aguarda_lab")?": "+v("aguarda_lab"):"") : "");
+  add("", "# EXAMES LABORATORIAIS", lab || "Aguarda");
+  const img = [];
+  const jan = FAST_JANELAS.filter(([k])=>get(k)).map(([k,rot])=>rot.toLowerCase()+" "+({"+":"positiva","−":"negativa","NR":"não realizada"}[get(k)]||get(k)));
+  if(get("efast_global")) img.push("FAST "+get("efast_global").toLowerCase()+(jan.length?" ("+jan.join(", ")+")":""));
+  if(get("efast_ls_d")||get("efast_ls_e")) img.push("E-FAST: "+lsTexto());
+  if(sinfiseCm()!==null) img.push("FAST-PLUS: sínfise púbica "+nf1(sinfiseCm(),1)+" cm"+(pelveInstavel()?" — pelve instável":""));
+  if(get("tc")==="Sim") img.push("TC "+(v("tc_protocolo")?v("tc_protocolo").toLowerCase():"")+(lista("tc_contraste")?" ("+lista("tc_contraste").toLowerCase()+")":"")+(v("tc_achados")?": "+v("tc_achados"):""));
+  if(tem("saida_aguarda","Aguarda exames de imagem")) img.push("Aguarda"+(v("aguarda_img")?": "+v("aguarda_img"):""));
+  add("", "# EXAMES DE IMAGEM", img.length ? img.join("\n") : "Aguarda");
+  // hemostasia
+  const hem = [];
+  if(v("atx")) hem.push("Ácido tranexâmico: "+v("atx").toLowerCase()+(v("atx_esquema")?" — "+v("atx_esquema"):"")+(v("atx_motivo")?" ("+v("atx_motivo").toLowerCase()+")":""));
+  if(v("ptm")) hem.push("PTM: "+v("ptm").toLowerCase());
+  if(get("st_acionado")==="Sim") hem.push("Sangue total acionado"+(v("h_st")?" às "+v("h_st"):"")+(v("t_st")?" — "+v("t_st")+" U":"")+(v("st_tipo")?" "+v("st_tipo"):""));
+  const tr = [v("t_ch")?v("t_ch")+" CH":"", v("t_pfc")?v("t_pfc")+" PFC":"", v("t_plq")?v("t_plq")+" plaquetas":""].filter(Boolean);
+  if(tr.length) hem.push("Hemocomponentes: "+tr.join(", "));
+  if(v("calcio_reposto")) hem.push("Cálcio reposto: "+v("calcio_reposto").toLowerCase()+(v("calcio_sal")?" ("+v("calcio_sal").toLowerCase()+")":""));
+  if(hem.length) add("", "# HEMOSTASIA", ...hem);
+  // conduta
+  add("", "# CONDUTA ORIENTADA POR PRECEPTORIA"+(v("nota_preceptor")?" — "+v("nota_preceptor"):""));
+  if(v("nota_discussao")) add(v("nota_discussao"));
+  add("", "-----------------", "");
+  const cond = v("nota_conduta");
+  add(cond || ("- Destino: "+(v("destino")||"__")));
+  if(v("nota_reav")) add("", "---------", "# REAVALIAÇÃO:", v("nota_reav"));
+  if(v("nota_localizado")) add("", "----------", "# TRAUMA LOCALIZADO:", v("nota_localizado"));
+  return L.join("\n").replace(/\n{3,}/g,"\n\n");
+}
+function tituloNota(){ return "TRAUMA, "+(get("idade")?get("idade")+" anos":"__ anos")+", AT ______ — "+(get("id")||""); }
+async function copiarNota(){
+  const t = notaTasy();
+  try{ await navigator.clipboard.writeText(t); flash("nota copiada"); alert("Nota copiada. Cole no Google Keep e complete nome e AT."); }
+  catch(e){
+    const ta=document.getElementById("notaPrev"); const r=document.createRange(); r.selectNodeContents(ta);
+    const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    try{ document.execCommand("copy"); alert("Nota copiada."); }catch(_){ alert("Selecione o texto da prévia e copie manualmente."); }
+  }
+}
+async function enviarKeep(){
+  const t = notaTasy();
+  if(navigator.share){
+    try{ await navigator.share({ title: tituloNota(), text: t }); return; }
+    catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  try{ await navigator.clipboard.writeText(t); }catch(e){}
+  alert("Nota copiada. O Google Keep vai abrir: crie uma nota e cole (Ctrl+V / colar).");
+  window.open("https://keep.google.com/#home","_blank");
+}
+function secNota(){
+  const chips = (k,arr)=>'<div class="opts" style="margin-top:6px">'+arr.map(x=>'<button class="opt" data-a="addlinha" data-k="'+k+'" data-v="'+esc(x)+'">+ '+esc(x)+'</button>').join("")+'</div>';
+  return '<div class="sec"><h2>Nota para o Tasy</h2>'
+    + '<p class="hint" style="margin:-4px 0 10px">Junta tudo o que foi preenchido no formato da nota do serviço. Complete abaixo a discussão com a preceptoria e as condutas, '
+    + 'depois toque em <b>Enviar para o Keep</b>. Nome e AT ficam como lacuna — completar no Keep, nunca aqui.</p>'
+    + '<div class="grid g2">'+fTexto("nota_preceptor","Preceptor(a) / staff","Dr(a). …")+fTexto("nota_pend","Pendências","ex.: aguarda TC, avaliação da Ortopedia")+'</div>'
+    + '<div style="margin-top:10px">'+fArea("nota_discussao","Discussão com a preceptoria","resumo do que foi discutido e decidido com o(a) preceptor(a)")+'</div>'
+    + '<div style="margin-top:10px">'+fArea("nota_conduta","Condutas","uma por linha, começando com -")+chips("nota_conduta",NOTA_CONDUTAS)+'</div>'
+    + '<div style="margin-top:10px">'+fArea("nota_lab","Exames laboratoriais (resultados)","em branco = “Aguarda”")+'</div>'
+    + '<div style="margin-top:10px">'+fArea("nota_reav","Reavaliação (opcional)","")
+    + '<button class="btn" style="margin-top:6px" data-a="modelo" data-k="nota_reav">Inserir modelo de reavaliação</button></div>'
+    + '<div style="margin-top:10px">'+fArea("nota_localizado","Trauma localizado (opcional)","")
+    + '<button class="btn" style="margin-top:6px" data-a="modelo" data-k="nota_localizado">Inserir modelo de trauma localizado</button></div>'
+    + '</div>'
+    + '<div class="sec"><h2>Prévia da nota</h2>'
+    + '<div class="notabtns"><button class="btn novo" data-a="notakeep">📝 Enviar para o Keep</button>'
+    + '<button class="btn" data-a="notacopiar">Copiar texto</button></div>'
+    + '<pre class="notaprev" id="notaPrev">'+esc(notaTasy())+'</pre>'
+    + '<p class="hint">No celular, "Enviar para o Keep" abre o menu de compartilhar: escolha <b>Keep</b>. No computador, o texto é copiado e o Keep abre numa nova aba — crie a nota e cole.</p>'
+    + '</div>';
+}
+
 /* ============================ EVENTOS ============================ */
 function ligar(){
   app.querySelectorAll("[data-a]").forEach(el=>{
@@ -2203,6 +2332,17 @@ function ligar(){
       }
       if(a==="fechar"){ set("_fechado", get("_fechado") ? undefined : true); return render(); }
       if(a==="parse"){ parseAPH(); return render(); }
+      if(a==="addlinha"){
+        const atual = (get(k)||"").replace(/\s+$/,"");
+        set(k, (atual ? atual+"\n" : "") + "- " + v); return render();
+      }
+      if(a==="modelo"){
+        const atual = (get(k)||"").replace(/\s+$/,"");
+        if(atual && !confirm("Já existe texto aqui. Acrescentar o modelo no final?")) return;
+        set(k, (atual ? atual+"\n" : "") + NOTA_MODELOS[k]); return render();
+      }
+      if(a==="notacopiar"){ copiarNota(); return; }
+      if(a==="notakeep"){ enviarKeep(); return; }
       if(a==="export") return exportar();
     });
   });
@@ -2212,6 +2352,8 @@ function ligar(){
         set(el.dataset.k, el.value);
         /* atualiza só o bloco de cálculo — nunca redesenha o formulário
            enquanto alguém digita, sob pena de perder o valor e fechar o teclado */
+        const prev = document.getElementById("notaPrev");
+        if(prev) prev.textContent = notaTasy();
         const alvo = document.getElementById("calc-adm");
         if(alvo && (el.dataset.k==="adm_pas" || el.dataset.k==="adm_fc")) alvo.innerHTML = calcAdmHTML();
         const mx = /^([xabcde])_alterado$/.exec(el.dataset.k);
