@@ -531,7 +531,7 @@ const XABCDE = [
    ["Sinais de hipertensão intracraniana","Neurocirurgia acionada"]],
   ["E","e","Dorso sem desalinhamento e sem lesões cutâneas. Controle térmico. Pulsos 4/4+ presentes bilateralmente. "
          + "Sem dor à palpação de ossos longos. Sem dor à palpação de coluna.",
-   ["Manta térmica","Fluido aquecido","Nenhum aquecimento","Ortopedia acionada"]]
+   ["Manta térmica","Fluido aquecido","Nenhum aquecimento"]]
 ];
 function fraseX(frase){
   const v = k => { const x = get(k); return (x===undefined || x==="") ? "__" : esc(x); };
@@ -735,6 +735,22 @@ function fGcs(k){
 const GCS_NT = { gcs_o:"ex.: edema palpebral, trauma ocular", gcs_v:"ex.: intubado, traqueostomia", gcs_m:"ex.: sedação, curarização, lesão medular" };
 function gcsTemNT(){ return ["gcs_o","gcs_v","gcs_m"].some(k=>get(k)==="NT"); }
 function gcsDescr(){ return "O"+(get("gcs_o")||"?")+" V"+(get("gcs_v")||"?")+" M"+(get("gcs_m")||"?"); }
+/* Ortopedia: campo próprio logo abaixo da letra E */
+function blocoOrtopedia(){
+  const sim = get("orto")==="Sim";
+  return '<div class="box '+(sim?"pos":"")+'" style="margin:-2px 0 10px">'
+    + '<div class="boxt">🦴 Ortopedia</div>'
+    + fRadio("orto","Ortopedia acionada?",["Sim","Não"])
+    + (sim ? '<div class="grid g2" style="margin-top:8px">'
+        + '<div class="fld"><label>Horário do acionamento</label>'
+        + (get("orto_h")
+            ? '<div class="opts" style="align-items:center"><b style="font-size:20px; color:#fff">'+esc(get("orto_h"))+'</b><button class="tsm" data-a="limpar" data-k="orto_h">desfazer</button></div>'
+            : '<button class="btn" data-a="agora" data-k="orto_h">Tocar — registra a hora</button>')
+        + '</div>'
+        + fTexto("orto_motivo","Motivo","ex.: fratura exposta de tíbia, luxação de ombro")
+        + '</div>' : "")
+    + '</div>';
+}
 function gcsSelect(k,rot){
   const [, itens] = GCS[k];
   return '<div class="fld"><label>'+rot+'</label><select data-k="'+k+'" class="gsel"><option value="">—</option>'
@@ -1004,6 +1020,7 @@ function normalizarCaso(c){
     c.calcio_reposto = "Sim";
     if(c.calcio_tipo) c.calcio_sal = /gluconato/i.test(c.calcio_tipo) ? "Gluconato de cálcio" : "Cloreto de cálcio";
   }
+  if(Array.isArray(c.e_int) && c.e_int.indexOf("Ortopedia acionada")>=0){ c.e_int = c.e_int.filter(x=>x!=="Ortopedia acionada"); if(!c.orto) c.orto = "Sim"; }
   if(Array.isArray(c.b_int)) c.b_int = c.b_int.map(x=> x==="Descompressão por agulha" ? "Descompressão torácica imediata" : x);
   if(c.atx_esquema && ATX_LEGADO[c.atx_esquema]) c.atx_esquema = ATX_LEGADO[c.atx_esquema];
   if(typeof c.mecanismo==="string") c.mecanismo = [c.mecanismo];
@@ -1862,6 +1879,7 @@ function secXabcde(){
     h += '<div class="opts" style="margin-top:8px">';
     intervs.forEach(v=>{ h += '<button class="opt '+(tem(k+"_int",v)?"on":"")+'" data-a="multi" data-k="'+k+'_int" data-v="'+v+'">'+v+'</button>'; });
     h += '</div></div>';
+    if(k==="e") h += blocoOrtopedia();
   });
   h += '<div style="margin-top:6px">'
     + fRadio("resposta_volume","Resposta a volume",["Não precisou","Respondedor","Transitório","Não respondedor"])
@@ -2170,6 +2188,7 @@ function notaTasy(){
     else if(st==="A") t = v(k+"_alterado") || "alterado";
     add(Lt+": "+t);
   });
+  if(v("orto")==="Sim") add("Ortopedia acionada"+(v("orto_h")?" às "+v("orto_h"):"")+(v("orto_motivo")?" — "+v("orto_motivo"):""));
   // exames
   const lab = v("nota_lab") || (tem("saida_aguarda","Aguarda exames laboratoriais") ? "Aguarda"+(v("aguarda_lab")?": "+v("aguarda_lab"):"") : "");
   add("", "# EXAMES LABORATORIAIS", lab || "Aguarda");
