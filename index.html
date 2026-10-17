@@ -751,6 +751,48 @@ function blocoEspecialidade(p, icone, nome, exMotivo){
         + '</div>' : "")
     + '</div>';
 }
+/* Sedação e RASS (Richmond Agitation-Sedation Scale) */
+const SED_DROGAS = ["Midazolam","Fentanil","Propofol","Cetamina","Etomidato","Dexmedetomidina","Rocurônio","Succinilcolina","Outra"];
+const RASS = [
+  ["Passo 1 · Observe o paciente sem estímulo", [
+    ["+4","Combativo","violento, perigo imediato para a equipe"],
+    ["+3","Muito agitado","puxa ou remove tubos e cateteres; agressivo"],
+    ["+2","Agitado","movimentos sem propósito frequentes, briga com o ventilador"],
+    ["+1","Inquieto","ansioso, mas sem movimentos agressivos ou vigorosos"],
+    ["0","Alerta e calmo",""]]],
+  ["Passo 2 · Não está alerta? Chame pelo nome e peça para olhar para você", [
+    ["−1","Sonolento","desperta e mantém contato visual por ≥ 10 s ao chamado"],
+    ["−2","Sedação leve","desperta brevemente, contato visual < 10 s"],
+    ["−3","Sedação moderada","movimento ou abertura ocular ao chamado, sem contato visual"]]],
+  ["Passo 3 · Sem resposta à voz? Estímulo físico (sacudir o ombro, esfregar o esterno)", [
+    ["−4","Sedação profunda","sem resposta à voz; movimento ou abertura ocular ao estímulo físico"],
+    ["−5","Não despertável","sem resposta à voz nem ao estímulo físico"]]]];
+function rassDescr(x){ for(const [,itens] of RASS) for(const [v,n,d] of itens) if(v===x) return v+" · "+n; return ""; }
+function blocoSedacao(){
+  const sed = get("sedado")==="Sim", r = get("rass");
+  let h = '<div class="box '+(sed?"pos":"")+'" style="margin:-2px 0 10px">'
+    + '<div class="boxt">💉 Sedação</div>'
+    + fRadio("sedado","Paciente sedado?",["Não","Sim"]);
+  if(sed){
+    h += '<div style="margin-top:8px">'+fRadio("sed_iot","Chegou em IOT?",["Sim","Não"])+'</div>'
+       + '<div style="margin-top:8px">'+fMulti("sed_drogas","Drogas utilizadas",SED_DROGAS)+'</div>'
+       + (tem("sed_drogas","Outra") ? '<div style="margin-top:6px">'+fTexto("sed_drogas_outra","Qual droga")+'</div>' : "")
+       + '<div style="margin-top:6px">'+fTexto("sed_doses","Doses, horário e quem administrou","ex.: midazolam 15 mg + fentanil 150 mcg pelo APH às 10:20")+'</div>'
+       + '<p class="hint" style="margin:6px 0 0">Sob sedação ou IOT, registre o Glasgow como NT no item afetado e use o RASS abaixo.</p>';
+  }
+  h += '<div class="fld" style="margin-top:10px"><label>RASS — toque no nível que descreve o paciente'
+     + (r ? ' · <b style="color:#fff">'+esc(rassDescr(r))+'</b>' : '')+'</label>'
+     + '<p class="hint" style="margin:2px 0 0">Siga os passos na ordem; toque de novo no nível marcado para desmarcar.</p>';
+  RASS.forEach(([passo,itens])=>{
+    h += '<p class="hint" style="margin:8px 0 4px">'+passo+'</p><div class="opts">';
+    itens.forEach(([v,n,d])=>{
+      h += '<button class="opt '+(r===v?"on":"")+'" style="display:block;width:100%;text-align:left" data-a="radio" data-k="rass" data-v="'+v+'" title="'+esc(d)+'"><b style="display:inline-block;min-width:30px">'+v+'</b> '+n
+         + (d?'<span style="display:block;font-size:11px;opacity:.8;font-weight:400">'+d+'</span>':'')+'</button>';
+    });
+    h += '</div>';
+  });
+  return h + '</div></div>';
+}
 function blocoOrtopedia(){ return blocoEspecialidade("orto","🦴","Ortopedia","ex.: fratura exposta de tíbia, luxação de ombro"); }
 function blocoNeuro(){ return blocoEspecialidade("neuro","🧠","Neurocirurgia","ex.: HSD agudo na TC, Glasgow em queda, anisocoria"); }
 function gcsSelect(k,rot){
@@ -1914,7 +1956,7 @@ function secXabcde(){
     h += '<div class="opts" style="margin-top:8px">';
     intervs.forEach(v=>{ h += '<button class="opt '+(tem(k+"_int",v)?"on":"")+'" data-a="multi" data-k="'+k+'_int" data-v="'+v+'">'+v+'</button>'; });
     h += '</div></div>';
-    if(k==="d") h += blocoNeuro();
+    if(k==="d") h += blocoSedacao() + blocoNeuro();
     if(k==="e") h += blocoOrtopedia();
   });
   h += '<div style="margin-top:6px">'
@@ -1922,8 +1964,11 @@ function secXabcde(){
     + '</div>'
     + '<div class="grid g3" style="margin-top:10px">'
     + fTexto("cristaloide_sala","Cristaloide na sala (mL)","","number")
-    + fTexto("be","BE","","number") + fTexto("lactato","Lactato","","number")
-    + '</div></div>';
+    + (get("gaso_nc") ? '<div class="fld" style="grid-column:span 2"><label>Gasometria arterial</label><div class="alert a" style="margin:0">BE e lactato (não coletados)</div></div>'
+                      : fTexto("be","BE","","number") + fTexto("lactato","Lactato","","number"))
+    + '</div>'
+    + '<div class="opts" style="margin-top:6px">'+fBool("gaso_nc","Gasometria arterial não coletada")+'</div>'
+    + '</div>';
   return h;
 }
 
@@ -2225,11 +2270,19 @@ function notaTasy(){
     else if(st==="A") t = v(k+"_alterado") || "alterado";
     add(Lt+": "+t);
   });
+  if(v("sedado")==="Sim" || v("rass")){
+    const dr = (get("sed_drogas")||[]).map(d=>d==="Outra" ? (v("sed_drogas_outra")||"outra") : d.toLowerCase());
+    add("Sedação: "+[v("sedado")==="Sim" ? "sedado"+(v("sed_iot")==="Sim"?", chegou em IOT":v("sed_iot")==="Não"?", sem IOT":"") : (v("sedado")==="Não"?"sem sedação":""),
+        dr.length ? "drogas: "+dr.join(", ") : "", v("sed_doses"), v("rass") ? "RASS "+rassDescr(v("rass")).toLowerCase() : ""].filter(Boolean).join("; "));
+  }
   if(v("neuro")==="Sim") add("Neurocirurgia acionada"+(v("neuro_h")?" às "+v("neuro_h"):"")+(v("neuro_motivo")?" — "+v("neuro_motivo"):""));
   if(v("orto")==="Sim") add("Ortopedia acionada"+(v("orto_h")?" às "+v("orto_h"):"")+(v("orto_motivo")?" — "+v("orto_motivo"):""));
   // exames
   const lab = v("nota_lab") || (tem("saida_aguarda","Aguarda exames laboratoriais") ? "Aguarda"+(v("aguarda_lab")?": "+v("aguarda_lab"):"") : "");
+  const gaso = get("gaso_nc") ? "BE e lactato (não coletados)"
+             : [v("be")?"BE "+v("be"):"", v("lactato")?"lactato "+v("lactato"):""].filter(Boolean).join(" · ");
   add("", "# EXAMES LABORATORIAIS", lab || "Aguarda");
+  if(gaso) add(gaso);
   const img = [];
   const jan = FAST_JANELAS.filter(([k])=>get(k)).map(([k,rot])=>rot.toLowerCase()+" "+({"+":"positiva","−":"negativa","NR":"não realizada"}[get(k)]||get(k)));
   if(get("efast_global")) img.push("FAST "+get("efast_global").toLowerCase()+(jan.length?" ("+jan.join(", ")+")":""));
@@ -2334,6 +2387,7 @@ function ligar(){
         return render();
       }
       if(a==="bool"){ if(k==="rabt_pelve") delete caso()._imp_pelve;
+        if(k==="gaso_nc" && !get(k)){ const c=caso(); delete c.be; delete c.lactato; }
         const mi = /^(cena|adm)_pa_inaud$/.exec(k);
         if(mi && !get(k)){ const c=caso(); delete c[mi[1]+"_pas"]; delete c[mi[1]+"_pad"]; }
         set(k, get(k) ? undefined : true); return render(); }
