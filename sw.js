@@ -1,6 +1,6 @@
 /* Service worker — cache local para funcionamento offline.
    Ao publicar uma versão nova do app, troque o número em CACHE. */
-const CACHE = "ficha-trauma-v49";
+const CACHE = "ficha-trauma-v50";
 const ARQUIVOS = ["./", "./index.html", "./manifest.json", "./icon.svg"];
 /* logos são opcionais: se não estiverem no repositório, a instalação não pode falhar */
 const OPCIONAIS = ["./logo-epm.png", "./logo-unifesp.png", "./logo-epm.svg", "./logo-unifesp.svg"];

@@ -1842,9 +1842,11 @@ function secCena(){
    + fRadio("alergia","A · Alergias",["Nega","Sim","Não avaliável"])
    + '<div style="margin-top:10px">'+fRadio("anticoag","M · Medicações — anticoagulante ou antiagregante",["Não","Sim","Não avaliável"])+'</div>'
    + (get("anticoag")==="Sim" ? '<div style="margin-top:8px">'+fTexto("anticoag_qual","Qual droga e última dose")+'</div>' : "")
-   + '<div style="margin-top:10px">'+fTexto("comorbidades","B · Background — comorbidades relevantes","cardiopatia, hepatopatia, doença renal… ou Nega")+'</div>'
-   + '<div style="margin-top:10px">'+fMulti("marcadores","O · Outros — marcadores",["Etilismo ou drogas","Recusa transfusão","Gestante","Cirurgia neurológica prévia"])
-   + '<div style="margin-top:8px">'+fTexto("outros_desc","Outros — descrever","outras informações relevantes (preenchimento livre)")+'</div></div>'
+   + '<div class="fld" style="margin-top:10px"><label>B · Background — comorbidades relevantes</label><div class="opts">'+fBool("comorb_na","Não avaliável")+'</div></div>'
+   + (get("comorb_na") ? "" : '<div style="margin-top:6px">'+fTexto("comorbidades","Descrever","cardiopatia, hepatopatia, doença renal… ou Nega")+'</div>')
+   + '<div class="fld" style="margin-top:10px"><label>O · Outros</label><div class="opts">'+fBool("outros_na","Não avaliável")+'</div></div>'
+   + (get("outros_na") ? "" : '<div style="margin-top:6px">'+fMulti("marcadores","Marcadores",["Etilismo ou drogas","Recusa transfusão","Gestante","Cirurgia neurológica prévia"])
+   + '<div style="margin-top:8px">'+fTexto("outros_desc","Outros — descrever","outras informações relevantes (preenchimento livre)")+'</div></div>')
    + '</div>';
 }
 
@@ -2214,8 +2216,8 @@ function notaTasy(){
   add("I: "+[v("idade")?v("idade")+" anos":"", sexo].filter(Boolean).join(", "),
       "M: "+mec, "I: "+v("injurias"), "S: "+sv, "T: "+v("transporte"), "T: "+v("aph_tempo"),
       "T: "+[lista("aph_fez"), v("aph_volume")?"volume "+v("aph_volume")+" mL":""].filter(Boolean).join("; "), "",
-      "A: "+v("alergia"), "M: "+(v("anticoag")==="Sim" ? "anticoagulante/antiagregante: "+(v("anticoag_qual")||"sim") : (v("anticoag")==="Não"?"nega anticoagulante/antiagregante":v("anticoag"))),
-      "B: "+v("comorbidades"), "O: "+[lista("marcadores"), v("outros_desc")].filter(Boolean).join("; "), "");
+      "A: "+(v("alergia")==="Não avaliável"?"não avaliável":v("alergia")), "M: "+(v("anticoag")==="Sim" ? "anticoagulante/antiagregante: "+(v("anticoag_qual")||"sim") : (v("anticoag")==="Não"?"nega anticoagulante/antiagregante":v("anticoag"))),
+      "B: "+(get("comorb_na")?"não avaliável":v("comorbidades")), "O: "+(get("outros_na")?"não avaliável":[lista("marcadores"), v("outros_desc")].filter(Boolean).join("; ")), "");
   // X-ABCDE
   XABCDE.forEach(([Lt,k,frase])=>{
     const st = estadoX(k); let t = "";
