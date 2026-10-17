@@ -1529,14 +1529,19 @@ function ajustarTopo(){
   if(t) document.documentElement.style.setProperty("--topH", t.offsetHeight+"px");
 }
 window.addEventListener("resize", ajustarTopo);
+/* só volta ao topo quando muda de tela, aba ou caso; ao marcar uma opção, mantém a rolagem */
+let _telaAnterior = "";
 function render(){
+  const tela = vista+"|"+(vista==="ficha" ? aba+"|"+atualUid : "");
+  const mesma = tela===_telaAnterior, y = window.scrollY;
+  _telaAnterior = tela;
   document.getElementById("foot").style.display = vista==="ficha" ? "flex" : "none";
   document.getElementById("chipCaso").textContent =
     vista==="ficha" ? (get("id")||"—") : (ativos().length+" caso"+(ativos().length===1?"":"s"));
   app.innerHTML = vista==="lista" ? htmlLista() : htmlFicha();
   ligar();
   ajustarTopo();
-  window.scrollTo(0,0);
+  window.scrollTo(0, mesma ? y : 0);
 }
 
 /* ---------- LISTA ---------- */
@@ -2364,7 +2369,7 @@ function ligar(){
     });
   });
   app.querySelectorAll("select[data-k]").forEach(el=>{
-    el.addEventListener("change", ()=>{ set(el.dataset.k, el.value||undefined); const y=scrollY; render(); scrollTo(0,y); });
+    el.addEventListener("change", ()=>{ set(el.dataset.k, el.value||undefined); render(); });
   });
   app.querySelectorAll("[data-k]").forEach(el=>{
     if(el.tagName==="INPUT" || el.tagName==="TEXTAREA"){
@@ -2392,7 +2397,7 @@ function ligar(){
       if(el.dataset.k==="h_trauma") el.addEventListener("change", ()=> render());
       if(el.dataset.k==="velocidade") el.addEventListener("change", ()=>{ aplicarVelocidade(); render(); });
       if(el.dataset.k==="efast_sinfise_cm") el.addEventListener("change", ()=>{ sincronizarExameX(); render(); });
-      if(aba===4 && /^adm_(fr|spo2|pas|pad|fc)$/.test(el.dataset.k)) el.addEventListener("change", ()=>{ const y=scrollY; render(); scrollTo(0,y); });
+      if(aba===4 && /^adm_(fr|spo2|pas|pad|fc)$/.test(el.dataset.k)) el.addEventListener("change", ()=>{ render(); });
       if(el.dataset.k==="t_ch" || el.dataset.k==="t_st") el.addEventListener("change", ()=>{ salvar(); render(); });
     }
   });
