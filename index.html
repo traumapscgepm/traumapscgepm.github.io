@@ -255,6 +255,7 @@
   button.tcard:not(.set):not(.na) .tv{color:#ff6b6f}
   .tsm{background:#1d2c43; color:var(--ink)}
 
+  .alert{text-align:justify; hyphens:auto; -webkit-hyphens:auto}
   .alert.r{background:rgba(229,72,77,.14); color:#ffb3b5; border-color:var(--red)}
   .alert.g{background:rgba(63,185,80,.12); color:#8fe39a; border-color:var(--green)}
   .alert.a{background:rgba(212,167,44,.13); color:#f2cc60; border-color:var(--amber)}
@@ -390,7 +391,9 @@
   .h3-novo{margin-top:24px}
   .h3-right{text-align:right; position:relative}
   .h3-logos{display:flex; justify-content:flex-end; align-items:center; gap:18px}
-  .h3-logos .lg1{height:86px} .h3-logos .lg2{height:96px; padding:6px; border-radius:14px; background:var(--epm-green);
+  .h3-logos .lg1{height:86px} .h3-logos .lg2{height:104px; width:104px; object-fit:contain; padding:14px; border-radius:50%;
+     background:radial-gradient(circle at 30% 25%, #3d7fe6 0%, #1a56c4 45%, #0d3a92 100%);
+     outline:3px solid rgba(255,255,255,.18); outline-offset:3px;
      box-shadow:0 8px 22px rgba(0,0,0,.35)}
   .h3-num{font-family:"Playfair Display",Georgia,serif; font-weight:900; font-size:clamp(84px,13vw,190px); line-height:.9; margin-top:14px;
      text-shadow:0 6px 30px rgba(53,167,224,.25)}
@@ -407,12 +410,35 @@
     .h3-top{gap:6px 16px; font-size:12px}
     .h3-grid{grid-template-columns:1fr; gap:6px}
     .h3-right{order:-1; display:flex; align-items:flex-end; justify-content:space-between; text-align:left}
-    .h3-logos{order:2; gap:10px} .h3-logos .lg1{height:52px} .h3-logos .lg2{height:60px; padding:4px; border-radius:10px}
+    .h3-logos{order:2; gap:10px} .h3-logos .lg1{height:52px} .h3-logos .lg2{height:66px; width:66px; padding:9px}
     .h3-num{font-size:84px; margin:0} .h3-numl{font-size:14px} .h3-nums{font-size:12px}
     .h3-novo{width:100%; justify-content:center}
     .h3-left{margin-top:18px} .h3-kick{font-size:11.5px; letter-spacing:2.2px}
     .h3-stats{gap:6px 18px; font-size:14px} .h3-stats b{font-size:24px}
   }
+  .cola{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:12px}
+  .cola summary,.aiscola summary{cursor:pointer; font-weight:800; color:var(--acc2)}
+  .cola ol{margin:8px 0 6px; padding-left:20px; line-height:1.6; color:#cdd9ea; font-size:14px}
+  .aisleg{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px}
+  .aisleg span{background:#16263d; border-radius:8px; padding:6px 10px; font-size:13px; color:#cdd9ea}
+  .aisleg small{display:block; color:var(--mut); font-size:11px}
+  .aisreg{border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; margin:10px 0; background:var(--card2)}
+  .aisreg.alto{border-color:var(--red); background:rgba(229,72,77,.06)}
+  .aish b{color:#fff; font-size:16px} .aish small{display:block; color:var(--mut); font-size:12.5px; margin-top:2px}
+  .aisbtns{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:8px}
+  .aisbtns .opt{flex-direction:column; justify-content:center; text-align:center; padding:6px 2px; min-width:0}
+  .aisbtns .opt b{font-size:18px} .aisbtns .opt small{font-size:10.5px; opacity:.8}
+  @media(max-width:520px){ .aisbtns{grid-template-columns:repeat(4,1fr)} }
+  .aisex{margin-top:8px; font-size:13.5px; color:#cdd9ea; background:#16263d; border-radius:8px; padding:8px 10px}
+  .aiscola{margin-top:6px} .aiscola ul{margin:6px 0 0; padding-left:18px; font-size:13px; line-height:1.55; color:#b8c6d8}
+  .trissin{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:6px 0 10px}
+  @media(max-width:620px){ .trissin{grid-template-columns:repeat(2,1fr)} }
+  .trissin span{background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12px; color:var(--mut)}
+  .trissin b{display:block; color:#fff; font-size:20px; margin-top:2px} .trissin small{display:block; font-size:11px}
+  .trisstab{width:100%; border-collapse:collapse; font-size:13px; color:#cdd9ea}
+  .trisstab th,.trisstab td{border-bottom:1px solid var(--line); padding:6px 4px; text-align:center}
+  .trisstab td:first-child{text-align:left; font-weight:700}
+  .issconta{font-size:15px; margin-bottom:4px; color:#fff}
   .creditos{text-align:center; color:var(--mut); font-size:12.5px; line-height:1.7; padding:18px 10px 8px;
        border-top:1px solid var(--line); margin-top:8px}
   .creditos b{color:#cfe0f5; font-weight:700}
@@ -864,6 +890,55 @@ const BISTURI = '<svg class="bist" viewBox="0 0 64 24" aria-hidden="true">'
 
 const SECOES = ["Identificação","Horários","iMIST-AMBO","Admissão","X-ABCDE","FAST-PLUS","Hemostasia","Saída","Escores","Pós"];
 
+/* ---------- AIS por região do ISS: abrangência + cola de exemplos ----------
+   Exemplos aproximados (AIS 2005/2008, AAAM). Para codificação de pesquisa, conferir no manual oficial. */
+const AIS_NIVEIS = [["0","Sem lesão"],["1","Leve"],["2","Moderada"],["3","Grave"],["4","Severa"],["5","Crítica"],["6","Máxima"]];
+const AIS_MORT = {1:"0–1%",2:"1–2%",3:"2–16%",4:"16–30%",5:"30–99%",6:"~100%"};
+const AIS_INFO = {
+  ais_cabeca: { inclui:"encéfalo, crânio, coluna e medula cervicais, estruturas do pescoço (vasos, laringe, traqueia cervical)", ex:{
+    1:"TCE com cefaleia/tontura, sem perda de consciência; entorse cervical sem fratura",
+    2:"concussão com perda de consciência < 1 h; fratura linear de calota; fratura de processo espinhoso ou transverso cervical",
+    3:"fratura de base de crânio; fratura com afundamento; HSA traumática; pequena contusão cerebral; fratura de corpo vertebral cervical sem déficit",
+    4:"hematoma extra ou subdural pequeno (≤ 50 mL); contusão cerebral extensa; lesão medular cervical incompleta",
+    5:"hematoma extra ou subdural volumoso (> 50 mL); lesão axonal difusa; lesão medular cervical completa (C4 ou abaixo)",
+    6:"esmagamento craniano; lesão de tronco encefálico; lesão medular completa C3 ou acima"}},
+  ais_face: { inclui:"boca, dentes, olhos, nariz, orelhas e ossos da face (inclui fraturas de órbita e mandíbula)", ex:{
+    1:"fratura de ossos nasais; fratura ou avulsão dentária; abrasão de córnea",
+    2:"fratura de mandíbula, zigomático ou órbita; Le Fort I ou II",
+    3:"Le Fort III; fratura panfacial",
+    4:"fratura facial com sangramento importante (perda > 20% da volemia)",
+    5:"raramente aplicável", 6:"raramente aplicável"}},
+  ais_torax: { inclui:"órgãos torácicos, diafragma, gradil costal e coluna/medula torácicas", ex:{
+    1:"fratura de 1 costela; contusão de parede sem lesão interna",
+    2:"fratura de 2 costelas; fratura de esterno",
+    3:"≥ 3 costelas sem tórax instável; contusão pulmonar unilateral; hemotórax ou pneumotórax; fratura de corpo vertebral torácico",
+    4:"tórax instável unilateral; contusão pulmonar bilateral; pneumotórax hipertensivo; lesão de diafragma",
+    5:"tórax instável bilateral; laceração aórtica contida; laceração cardíaca; lesão medular torácica completa",
+    6:"transecção aórtica com hemorragia livre; laceração cardíaca extensa; esmagamento torácico"}},
+  ais_abdome: { inclui:"órgãos abdominais e pélvicos (vísceras), retroperitônio e coluna/medula lombares", ex:{
+    1:"raramente aplicável (lesões superficiais vão em Externo)",
+    2:"laceração hepática ou esplênica AAST I–II; contusão renal; hematoma de mesentério pequeno",
+    3:"laceração hepática ou esplênica AAST III; perfuração de víscera oca; laceração renal profunda; fratura de corpo vertebral lombar",
+    4:"laceração hepática AAST IV; baço AAST IV–V; transecção de cólon ou duodeno",
+    5:"laceração hepática AAST V; avulsão de hilo renal ou esplênico; lesão de cava ou aorta abdominal; lesão pancreatoduodenal complexa",
+    6:"avulsão hepática total (AAST VI); esmagamento abdominal"}},
+  ais_extremidades: { inclui:"membros superiores e inferiores, cintura escapular e ossos da pelve (anel pélvico)", ex:{
+    1:"entorse; fratura ou luxação de dedo",
+    2:"fratura fechada de clavícula, escápula, úmero, rádio, ulna, tíbia ou fíbula; luxação de ombro ou cotovelo; anel pélvico estável",
+    3:"fratura de fêmur; fratura exposta de osso longo; amputação abaixo do joelho ou cotovelo; anel pélvico instável rotacional (livro aberto)",
+    4:"amputação acima do joelho; esmagamento de membro; pelve instável vertical",
+    5:"pelve instável com hemorragia > 20% da volemia",
+    6:"não se aplica"}},
+  ais_externo: { inclui:"pele e subcutâneo de qualquer região (escoriações, contusões, lacerações) e queimaduras", ex:{
+    1:"escoriação, contusão ou laceração superficial; queimadura de 1º grau; 2º/3º grau < 10% SC",
+    2:"laceração extensa ou avulsão de pele; queimadura 2º/3º grau 10–19% SC",
+    3:"queimadura 2º/3º grau 20–29% SC",
+    4:"queimadura 2º/3º grau 30–39% SC",
+    5:"queimadura 2º/3º grau 40–89% SC",
+    6:"queimadura 2º/3º grau ≥ 90% SC"}}
+};
+function issFaixa(v){ return v>=25 ? ["crítico","r"] : v>=16 ? ["grave (politrauma grave)","r"] : v>=9 ? ["moderado","a"] : ["leve","g"]; }
+
 /* regiões do AIS para o cálculo do ISS */
 const AIS_REGIOES = [
   ["ais_cabeca","Cabeça e pescoço"],["ais_face","Face"],["ais_torax","Tórax"],
@@ -1117,8 +1192,14 @@ function iss(){
 
 /* ---------- TRISS (probabilidade de sobrevida) ----------
    Ps = 1 / (1 + e^-b),  b = b0 + b1·RTS + b2·ISS + b3·índice de idade
-   Coeficientes do MTOS (Boyd, 1987). Índice de idade: 0 se < 55 anos, 1 se ≥ 55.
-   Convenção: menores de 15 anos usam os coeficientes de trauma contuso.   */
+   Mesmas entradas e coeficientes do MDCalc (revisão MTOS, Champion 1990):
+   tipo de trauma, RTS, ISS e idade ≤ 54 ou > 54 anos (índice 0 ou 1).   */
+const TRISS_COEF = { contuso:   {b0:-0.4499, b1:0.8085, b2:-0.0835, b3:-1.7430},
+                     penetrante:{b0:-2.5355, b1:0.9934, b2:-0.0651, b3:-1.1360} };
+function trissIdadeIdx(){
+  const m = get("triss_idade"); if(m) return m==="> 54 anos" ? 1 : 0;
+  const i = +get("idade"); return i ? (i>54 ? 1 : 0) : null;
+}
 /* Tipo de trauma: fonte única para RABT e TRISS.
    Prioridade: campo "Tipo de trauma" da Cena → mecanismo FAF/FAB → marcação manual. */
 function ehPenetrante(){
@@ -1127,19 +1208,18 @@ function ehPenetrante(){
   return !!get("rabt_penetrante");
 }
 function trissPenetrante(){
-  const idade = +get("idade");
-  if(idade && idade<15) return false;
   const manual = get("triss_mecanismo");
   if(manual) return manual==="Penetrante";
   return ehPenetrante();
 }
+function trissB(){
+  const r = rtsW(), i = iss(), ai = trissIdadeIdx();
+  if(r===null || i===null || ai===null) return null;
+  const c = trissPenetrante() ? TRISS_COEF.penetrante : TRISS_COEF.contuso;
+  return c.b0 + c.b1*r + c.b2*i + c.b3*ai;
+}
 function triss(){
-  const r = rtsW(), i = iss(), idade = +get("idade");
-  if(r===null || i===null || !idade) return null;
-  const pen = trissPenetrante();
-  const c = pen ? {b0:-0.6029, b1:1.1430, b2:-0.1516, b3:-2.6676}
-                : {b0:-1.2470, b1:0.9544, b2:-0.0768, b3:-1.9052};
-  const b = c.b0 + c.b1*r + c.b2*i + c.b3*(idade>=55?1:0);
+  const b = trissB(); if(b===null) return null;
   return Math.round((1/(1+Math.exp(-b)))*1000)/10;   // em %
 }
 
@@ -1883,39 +1963,79 @@ function secEscores(){
      + 'O valor ponderado alimenta o TRISS.</p></div>';
 
   /* ----- ISS ----- */
-  h += '<div class="sec"><h2>ISS — preencher depois, com laudo definitivo</h2>'
-     + '<p class="hint" style="margin:-4px 0 10px">AIS de 0 a 6 em cada região. '
-     + 'O ISS soma os quadrados dos três maiores. Qualquer região com AIS 6 força ISS 75.</p>';
+  h += '<div class="sec"><h2>ISS — Injury Severity Score</h2>'
+     + '<details class="cola" open><summary>Como calcular (cola)</summary><ol>'
+     + '<li>Preencher <b>depois</b>, com laudos e achados definitivos (TC, cirurgia). Não atrasar o atendimento.</li>'
+     + '<li>Para cada uma das <b>6 regiões do ISS</b>, marcar só o <b>AIS da lesão mais grave</b> daquela região.</li>'
+     + '<li>Escoriações, contusões e lacerações de pele de <b>qualquer</b> lugar e queimaduras vão em <b>Externo</b>.</li>'
+     + '<li>ISS = soma dos <b>quadrados</b> dos AIS das <b>3 regiões mais graves</b> (A² + B² + C²). Vai de 0 a 75.</li>'
+     + '<li>Qualquer região com <b>AIS 6</b> ⇒ ISS = <b>75</b> automaticamente.</li>'
+     + '<li>Duas lesões graves na <b>mesma</b> região contam uma vez só (o ISS subestima; o NISS usa as 3 piores lesões de qualquer região).</li>'
+     + '<li>Lesão sem gravidade definida (AIS 9 / NFS): deixe em branco e descreva — em branco conta como 0.</li>'
+     + '</ol>'
+     + '<div class="aisleg">'+AIS_NIVEIS.slice(1).map(([n,r])=>'<span><b>'+n+'</b> '+r+'<small>'+AIS_MORT[n]+' óbito</small></span>').join("")+'</div>'
+     + '</details>';
   AIS_REGIOES.forEach(([k,rot])=>{
-    h += '<div class="fld" style="margin-bottom:8px"><label>'+rot+'</label><div class="opts">'
-      + [0,1,2,3,4,5,6].map(n=>'<button class="opt '+(String(get(k))===String(n)?"on "+(n>=5?"warn":""):"")
-        +'" data-a="radio" data-k="'+k+'" data-v="'+n+'" style="min-width:52px; justify-content:center">'+n+'</button>').join("")
-      + '</div></div>';
+    const inf = AIS_INFO[k], cur = get(k);
+    h += '<div class="aisreg '+(cur!==undefined && cur!=="" && +cur>=3?"alto":"")+'">'
+      + '<div class="aish"><b>'+rot+'</b><small>'+inf.inclui+'</small></div>'
+      + '<div class="aisbtns">'+AIS_NIVEIS.map(([n,r])=>'<button class="opt '+(String(cur)===n?"on "+(+n>=4?"warn":""):"")+'" data-a="radio" data-k="'+k+'" data-v="'+n+'"><b>'+n+'</b><small>'+r+'</small></button>').join("")+'</div>'
+      + (cur!==undefined && cur!=="" && +cur>0 ? '<div class="aisex">AIS '+cur+' nesta região, por exemplo: <i>'+inf.ex[cur]+'</i></div>' : '')
+      + '<div style="margin-top:6px">'+fTexto(k+"_lesao","Lesão mais grave da região","descreva (ex.: laceração hepática grau III na TC)")+'</div>'
+      + '<details class="aiscola"><summary>Exemplos de AIS 1 a 6 nesta região</summary><ul>'
+      + [1,2,3,4,5,6].map(n=>'<li><b>'+n+'</b> — '+inf.ex[n]+'</li>').join("")
+      + '</ul></details></div>';
   });
-  h += '<div class="score '+(is===null?"":(is>=16?"r":"g"))+'"><div class="sl">ISS</div>'
+  // conta passo a passo
+  const regs = AIS_REGIOES.map(([k,rot])=>({rot, v: (get(k)===undefined||get(k)==="") ? null : +get(k)}));
+  const top = regs.filter(r=>r.v!==null && r.v>0).sort((a,b)=>b.v-a.v).slice(0,3);
+  let conta = "";
+  if(is===75 && regs.some(r=>r.v===6)) conta = 'AIS 6 em '+regs.find(r=>r.v===6).rot+' ⇒ ISS = 75';
+  else if(top.length) conta = top.map(r=>r.v+'² <small>('+r.rot+')</small>').join(' + ')+' = '+top.map(r=>r.v*r.v).join(' + ')+' = <b>'+is+'</b>';
+  const fx = is===null ? null : issFaixa(is);
+  h += '<div class="score '+(fx?fx[1]:"")+'"><div class="sl">ISS</div>'
      + '<div class="sv">'+(is===null?"—":is)+'</div>'
      + '<div class="sd">'+(is===null? "Nenhuma região pontuada ainda"
-        : (nreg<6 ? "Atenção: apenas "+nreg+" de 6 regiões pontuadas — as demais estão contando como zero. "
-                  : "")
-          + (is>=16?"ISS ≥ 16 — politrauma grave":"ISS < 16"))+'</div></div></div>';
+        : (conta ? '<div class="issconta">'+conta+'</div>' : "")
+          + 'Trauma <b>'+fx[0]+'</b> · MAIS '+Math.max(...regs.map(r=>r.v||0))
+          + (nreg<6 ? '<br>Atenção: '+(6-nreg)+' região(ões) sem marcação contam como 0 — marque 0 onde não há lesão.' : ""))+'</div></div>'
+     + '<p class="hint" style="margin-top:8px">Faixas usuais: 1–8 leve · 9–15 moderado · 16–24 grave · ≥ 25 crítico. ISS ≥ 16 define politrauma grave.</p></div>';
 
   /* ----- TRISS ----- */
-  const pen = trissPenetrante();
-  const idade = +get("idade");
+  const pen = trissPenetrante(), ai = trissIdadeIdx(), cf = pen ? TRISS_COEF.penetrante : TRISS_COEF.contuso;
+  const fmt = x => (x<0?"− ":"+ ")+Math.abs(x).toFixed(4).replace(".",",");
+  const nf = (x,d) => x.toFixed(d).replace(".",",");
+  const tb = trissB();
   h += '<div class="sec"><h2>TRISS — probabilidade de sobrevida</h2>'
-     + fRadio("triss_mecanismo","Coeficientes",["Contuso","Penetrante"])
-     + '<p class="hint" style="margin:6px 0 10px">Se não escolher, o app deduz do mecanismo registrado em Cena. '
-     + 'Menores de 15 anos usam coeficientes de trauma contuso, por convenção.</p>'
+     + '<p class="hint" style="margin:-4px 0 10px">Mesmas entradas do MDCalc: tipo de trauma, RTS, ISS e idade.</p>'
+     + '<div class="grid g2">'
+     + fRadio("triss_mecanismo","1 · Tipo de trauma",["Contuso","Penetrante"])
+     + fRadio("triss_idade","4 · Idade",["≤ 54 anos","> 54 anos"])
+     + '</div>'
+     + '<p class="hint" style="margin:6px 0 10px">Sem marcação, o tipo vem do mecanismo (Cena) e a faixa etária da idade na Identificação.</p>'
+     + '<div class="trissin">'
+     + '<span>1 · Tipo<b>'+(pen?"Penetrante":"Contuso")+'</b></span>'
+     + '<span>2 · RTS<b>'+(rw===null?"—":nf(rw,4))+'</b><small>'+(rw===null?"faltam dados da Admissão":"calculado acima")+'</small></span>'
+     + '<span>3 · ISS<b>'+(is===null?"—":is)+'</b><small>'+(is===null?"preencher o ISS":"calculado acima")+'</small></span>'
+     + '<span>4 · Idade<b>'+(ai===null?"—":(ai?"> 54":"≤ 54"))+'</b><small>índice '+(ai===null?"?":ai)+'</small></span>'
+     + '</div>'
      + '<div class="score '+(ps===null?"":(ps>=90?"g":(ps>=50?"a":"r")))+'">'
-     + '<div class="sl">Ps — TRISS</div>'
-     + '<div class="sv">'+(ps===null?"—":ps.toFixed(1)+"%")+'</div>'
+     + '<div class="sl">Ps — probabilidade de sobrevida</div>'
+     + '<div class="sv">'+(ps===null?"—":nf(ps,1)+"%")+'</div>'
      + '<div class="sd">'+(ps===null
         ? "Precisa de RTS completo, ISS e idade"
-        : "Coeficientes "+(pen?"penetrante":"contuso")+" · RTS ponderado "+rw.toFixed(4)
-          +" · ISS "+is+" · idade "+idade+" anos (índice "+(idade>=55?1:0)+")")+'</div></div>'
-     + '<div class="alert a" style="margin-top:12px">Os coeficientes são os do MTOS, publicados por Boyd em 1987, '
-       + 'e continuam sendo a referência clássica — mas superestimam mortalidade em casuísticas atuais. '
-       + 'Use o TRISS como descritor de gravidade da amostra, não como prognóstico individual à beira do leito.</div>'
+        : '<div class="issconta">b = '+nf(cf.b0,4)+' '+fmt(cf.b1)+'×'+nf(rw,4)+' '+fmt(cf.b2)+'×'+is+' '+fmt(cf.b3)+'×'+ai+' = '+nf(tb,4)+'</div>'
+          + 'Ps = 1 / (1 + e<sup>−b</sup>) · mortalidade prevista '+nf(100-ps,1)+'%')+'</div></div>'
+     + '<details class="cola" style="margin-top:10px"><summary>Fórmula e coeficientes</summary>'
+     + '<p class="hint" style="margin:8px 0 6px">b = b0 + b1·RTS + b2·ISS + b3·(índice de idade) · Ps = 1/(1+e<sup>−b</sup>)</p>'
+     + '<table class="trisstab"><tr><th></th><th>b0</th><th>b1 (RTS)</th><th>b2 (ISS)</th><th>b3 (idade)</th></tr>'
+     + '<tr><td>Contuso</td><td>−0,4499</td><td>0,8085</td><td>−0,0835</td><td>−1,7430</td></tr>'
+     + '<tr><td>Penetrante</td><td>−2,5355</td><td>0,9934</td><td>−0,0651</td><td>−1,1360</td></tr></table>'
+     + '<p class="hint" style="margin:6px 0 0">Índice de idade: 0 se ≤ 54 anos, 1 se > 54. RTS = 0,9368·GCS + 0,7326·PAS + 0,2908·FR (valores codificados 0–4).</p>'
+     + '</details>'
+     + '<div class="alert a" style="margin-top:12px">Os coeficientes vêm do Major Trauma Outcome Study (MTOS), base norte-americana antiga, '
+       + 'e tendem a superestimar a mortalidade em casuísticas atuais. Use o TRISS como descritor de gravidade da amostra '
+       + '(pesquisa e qualidade), não como prognóstico individual à beira do leito.</div>'
      + '</div>';
   return h;
 }
