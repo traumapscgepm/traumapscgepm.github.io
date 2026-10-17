@@ -132,6 +132,10 @@
   button.tcard:not(.set):not(.na) .tv{color:var(--red)}
   .tcard.lock{cursor:default}
   .tcard .tsub{font-size:11px; color:var(--mut); min-height:15px}
+  .tbig{display:block; width:100%; background:transparent; border:0; font:inherit; font-size:22px; font-weight:800;
+        color:var(--red); letter-spacing:.5px; padding:4px 0 2px; cursor:pointer}
+  .tcard.vazio{border-color:var(--red)}
+  .tcard input.tin.mini{font-size:15px; padding:6px; margin-top:4px}
   .tcard input[type=time]{width:100%; font-size:20px; font-weight:800; color:var(--navy); text-align:center;
        border:1.5px solid var(--line); border-radius:7px; padding:6px 2px; margin:2px 0 5px; background:#fff}
   .tnow{flex:1; background:var(--red); color:#fff; border:0; border-radius:7px; padding:9px 4px;
@@ -253,6 +257,7 @@
   .tcard .tv{color:#fff}
   .tcard .tv.off{color:#41536d}
   button.tcard:not(.set):not(.na) .tv{color:#ff6b6f}
+  .tbig{color:#ff6b6f}
   .tsm{background:#183a75; color:var(--ink)}
 
   .alert{text-align:justify; hyphens:auto; -webkit-hyphens:auto}
@@ -1760,33 +1765,22 @@ function secHorarios(){
    + 'Os demais: toque no cartão no instante em que acontece — o relógio do aparelho registra sozinho. '
    + 'N/A marca o que não se aplica, diferente de deixar vazio.</p><div class="clock">';
   HORARIOS.forEach(([k,rot])=>{
-    const v = get(k);
-    const na = v==="NA";
-    if(k==="h_trauma"){
-      h += '<div class="tcard '+(v&&!na?"set":"")+' '+(na?"na":"")+'">'
-         + '<div class="tl">'+rot+'</div>'
-         + (na ? '<div class="tv">N/A</div>'
-               : '<input type="time" data-k="h_trauma" value="'+esc(v||"")+'">')
-         + '<div class="trow"><button class="tsm" style="flex:1" data-a="na" data-k="'+k+'">'+(na?"Informar horário":"Desconhecido")+'</button></div>'
-         + '</div>';
-      return;
-    }
-    if(!v){
-      /* cartão inteiro é o botão: um toque grava a hora */
-      h += '<div><button class="tcard" data-a="agora" data-k="'+k+'">'
-         + '<div class="tl">'+rot+'</div><div class="tv">TOCAR</div>'
-         + '<div class="tsub">registra a hora atual</div></button>'
-         + '<div style="margin:-4px 0 0; text-align:center"><button class="tsm" data-a="na" data-k="'+k+'" style="padding:5px 10px; font-size:12px; min-height:34px; margin-top:8px">N/A</button></div></div>';
-      return;
-    }
+    const v = get(k), na = v==="NA", tem = v && !na;
     const ts = get("_ts_"+k);
     const seg = ts ? new Date(ts).toLocaleTimeString("pt-BR") : "";
-    h += '<div class="tcard lock '+(na?"na":"set")+'">'
-       + '<div class="tl">'+rot+'</div>'
-       + '<div class="tv">'+(na?"N/A":v)+'</div>'
-       + '<div class="tsub">'+(seg?"registrado "+seg:"")+'</div>'
-       + '<div class="trow"><button class="tsm" style="flex:1" data-a="limpar" data-k="'+k+'">desfazer</button></div>'
-       + '</div>';
+    h += '<div class="tcard '+(tem?"set":"")+' '+(na?"na":"")+' '+(!v?"vazio":"")+'">'
+       + '<div class="tl">'+rot+'</div>';
+    if(na) h += '<div class="tv">'+(k==="h_trauma"?"Desconhecido":"N/A")+'</div><div class="tsub"></div>';
+    else {
+      /* um toque grava a hora atual; o campo ao lado aceita digitação ou correção */
+      if(!tem) h += '<button class="tbig" data-a="agora" data-k="'+k+'">TOCAR</button>';
+      h += '<input type="time" class="tin '+(tem?"":"mini")+'" data-k="'+k+'" value="'+esc(tem?v:"")+'" aria-label="'+rot+' — digitar horário">'
+         + '<div class="tsub">'+(tem ? (seg ? "tocado às "+seg : "digitado") : (k==="h_trauma"?"toque ou digite o informado pelo APH":"toque ou digite o horário"))+'</div>';
+    }
+    h += '<div class="trow">'
+       + (tem ? '<button class="tsm" style="flex:1" data-a="limpar" data-k="'+k+'">desfazer</button>' : '')
+       + '<button class="tsm" style="flex:1" data-a="na" data-k="'+k+'">'+(na?"Informar horário":(k==="h_trauma"?"Desconhecido":"N/A"))+'</button>'
+       + '</div></div>';
   });
   h+='</div>';
 
@@ -2512,7 +2506,14 @@ function ligar(){
           }
         }
       });
-      if(el.dataset.k==="h_trauma") el.addEventListener("change", ()=> render());
+      if(HORARIOS.some(x=>x[0]===el.dataset.k)) el.addEventListener("change", ()=>{
+        const k = el.dataset.k, c = caso(), ts = c["_ts_"+k];
+        /* digitado à mão: o carimbo do toque deixa de valer se a hora mudou */
+        if(ts){ const d=new Date(ts); if(dois(d.getHours())+":"+dois(d.getMinutes())!==el.value) delete c["_ts_"+k]; }
+        const imp = HORARIO_IMPLICA[k];
+        if(el.value && imp && imp[1] && !c[imp[0]]){ c[imp[0]] = imp[1]; c["_imp_"+k] = true; }
+        salvar(); render();
+      });
       if(el.dataset.k==="velocidade") el.addEventListener("change", ()=>{ aplicarVelocidade(); render(); });
       if(el.dataset.k==="efast_sinfise_cm") el.addEventListener("change", ()=>{ sincronizarExameX(); render(); });
       if(el.dataset.k==="t_ch" || el.dataset.k==="t_st") el.addEventListener("change", ()=>{ salvar(); render(); });
