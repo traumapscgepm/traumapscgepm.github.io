@@ -1008,6 +1008,9 @@ function uid(){
 function agoraISO(){ return new Date().toISOString(); }
 /* garante _uid e _atualizado em casos antigos (v7 ou anteriores) */
 function normalizarCaso(c){
+  /* tipo de trauma passou a aceitar Contuso E Penetrante juntos */
+  if(typeof c.mecanismo_tipo==="string") c.mecanismo_tipo = c.mecanismo_tipo ? [c.mecanismo_tipo] : undefined;
+  if(c.mecanismo_tipo===undefined) delete c.mecanismo_tipo;
   /* casos antigos: _uid determinístico, para o mesmo caso nunca virar dois */
   if(!c._uid) c._uid = (c.id||c._criado) ? "legado-"+(c.id||"")+"-"+(c._criado||"") : uid();
   if(!c._atualizado) c._atualizado = c._criado || agoraISO();
@@ -1153,7 +1156,11 @@ function shockIndex(){
 /* torso = tórax, abdome, flanco, dorso ou pelve. Penetrante em membro, cabeça ou pescoço não pontua. */
 const TORSO_TXT = "tórax, abdome, flanco, dorso ou pelve";
 /* basta marcar "ferimento penetrante em torso"; só não vale se a Cena registrou trauma contuso */
-function cenaContusa(){ return get("mecanismo_tipo")==="Contuso" && !temPenetrante(); }
+function tiposTrauma(){ const a=get("mecanismo_tipo"); return Array.isArray(a) ? a : (a ? [a] : []); }
+function tipoTem(t){ return tiposTrauma().indexOf(t)>=0; }
+function tipoAmbos(){ return tipoTem("Contuso") && tipoTem("Penetrante"); }
+function tipoTxt(){ return ["Contuso","Penetrante"].filter(tipoTem).join(" e ").toLowerCase(); }
+function cenaContusa(){ return tipoTem("Contuso") && !tipoTem("Penetrante") && !temPenetrante(); }
 function rabtTorso(){ return get("rabt_torso")==="Sim" && !cenaContusa(); }
 function perguntaTorso(){
   if(!ehPenetrante()) return "";
@@ -1238,13 +1245,14 @@ function trissIdadeIdx(){
 /* Tipo de trauma: fonte única para RABT e TRISS.
    Prioridade: campo "Tipo de trauma" da Cena → mecanismo FAF/FAB → marcação manual. */
 function ehPenetrante(){
-  if(get("mecanismo_tipo")) return get("mecanismo_tipo")==="Penetrante";
+  if(tiposTrauma().length) return tipoTem("Penetrante");
   if(temPenetrante()) return true;
   return !!get("rabt_penetrante");
 }
 function trissPenetrante(){
   const manual = get("triss_mecanismo");
   if(manual) return manual==="Penetrante";
+  if(tipoAmbos()) return get("mecanismo_pred") ? get("mecanismo_pred")==="Penetrante" : true;
   return ehPenetrante();
 }
 function trissB(){
@@ -1352,9 +1360,12 @@ function parseAPH(){
       marca("mecanismo","Outro","mecanismo Outro");
       poe("mecanismo_outro", original.trim(), "descrição: "+original.trim().slice(0,40));
     }
-    if(/\bfaf\b|arma de fogo|balead|\btiro\b|\bfab\b|arma branca|facada|esfaquead|penetrante/.test(t))
-      poe("mecanismo_tipo","Penetrante","tipo penetrante");
-    else poe("mecanismo_tipo","Contuso","tipo contuso");
+    if(vazio("mecanismo_tipo")){
+      const pen = /\bfaf\b|arma de fogo|balead|\btiro\b|\bfab\b|arma branca|facada|esfaquead|penetrante/.test(t);
+      const cont = !pen || achados.some(m=>MEC_PENETRANTES.indexOf(m)<0);
+      if(cont) marca("mecanismo_tipo","Contuso","tipo contuso");
+      if(pen) marca("mecanismo_tipo","Penetrante","tipo penetrante");
+    }
     if(tem("mecanismo","Queda") && (m=t.match(/(\d+(?:[.,]\d+)?)\s*m(?:etros)?\b/)))
       poe("queda_altura",m[1].replace(",","."),"altura "+m[1]+" m");
     const agg=[[/ejetad|ejecao/,"Ejeção"],[/obito no local|morte no local/,"Óbito no local"],
@@ -1763,12 +1774,16 @@ function secCena(){
    + '</div></div>'
 
    + '<div class="sec"><h2>M · Mecanismo do trauma</h2>'
-   + fRadio("mecanismo_tipo","Tipo de trauma",["Contuso","Penetrante"])
+   + fMulti("mecanismo_tipo","Tipo de trauma — pode marcar os dois",["Contuso","Penetrante"])
+   + (tipoAmbos() ? '<div class="box" style="margin-top:8px">'
+      + fRadio("mecanismo_pred","Qual predomina? (define o TRISS)",["Contuso","Penetrante"])
+      + (get("mecanismo_pred") ? "" : '<p class="hint" style="margin:6px 0 0">Sem escolha, o TRISS usa penetrante.</p>')
+      + '</div>' : "")
    + '<div style="margin-top:10px">'
    + fMulti("mecanismo","Mecanismo — marque todos os envolvidos",MECANISMOS)
    + '</div>'
-   + (mecanismoMisto() && !get("mecanismo_tipo") ? '<div class="alert a" style="margin-top:8px">Mecanismo misto (penetrante + contuso). '
-      + 'Escolha acima o <b>tipo predominante</b> — é ele que define RABT e TRISS. Sem escolha, o app considera penetrante.</div>' : "")
+   + (mecanismoMisto() && !tiposTrauma().length ? '<div class="alert a" style="margin-top:8px">Mecanismo misto (penetrante + contuso). '
+      + 'Marque acima <b>Contuso e Penetrante</b> e indique o predominante (define o TRISS). Sem escolha, o app considera penetrante.</div>' : "")
    + perguntaTorso()
    + (tem("mecanismo","Queda") ? '<div class="grid g4" style="margin-top:8px">'+fTexto("queda_altura","Altura da queda (m)","","number")+'</div>' : "")
    + (tem("mecanismo","Outro") ? '<div style="margin-top:8px">'+fTexto("mecanismo_outro","Qual mecanismo")+'</div>' : "")
@@ -2166,7 +2181,7 @@ function notaTasy(){
       "==============================================", "# PS CIRURGIA GERAL #", "", "# ID:",
       "[NOME], "+(v("idade")?v("idade")+" anos":"__ anos")+(sexo?", "+sexo:"")+", AT [______]"+(v("peso")?" · peso "+v("peso")+" kg":""),
       "Código do estudo: "+(v("id")||"—"), "", "# HD:");
-  add(v("hd") || ("Vítima de trauma "+(v("mecanismo_tipo")||"").toLowerCase()+(lista("mecanismo")?" — "+lista("mecanismo").toLowerCase():"")));
+  add(v("hd") || ("Vítima de trauma "+tipoTxt()+(lista("mecanismo")?" — "+lista("mecanismo").toLowerCase():"")));
   // protocolo
   const si = shockIndex(), r = rtsW(), i = iss(), ps = triss();
   add("", "PROTOCOLO TRAUMA",
@@ -2174,7 +2189,7 @@ function notaTasy(){
       +" // SI "+(si===null?"—":nf1(si,2))+" // RABT "+rabtPontos(), "");
   // iMIST
   const mec = [lista("mecanismo"), v("mecanismo_outro"), v("velocidade")?v("velocidade")+" km/h":"", v("queda_altura")?"queda de "+v("queda_altura")+" m":"",
-               v("mecanismo_tipo")?"trauma "+v("mecanismo_tipo").toLowerCase():"", lista("agravantes")?"agravantes: "+lista("agravantes").toLowerCase():""].filter(Boolean).join("; ");
+               tipoTxt()?"trauma "+tipoTxt():"", lista("agravantes")?"agravantes: "+lista("agravantes").toLowerCase():""].filter(Boolean).join("; ");
   let sv;
   if(v("cena_sv")==="Ausentes") sv = "Sinais vitais ausentes — "+(v("pcr_chegada")==="Sim"?"chegou em PCR":"RCE antes da chegada")
       +(v("pcr_assistida")?", PCR assistida: "+v("pcr_assistida").toLowerCase():"")+(v("pcr_tempo_min")?", parado(a) há "+v("pcr_tempo_min")+(v("pcr_tempo_min")==="Desconhecido"?"":" min"):"");
